@@ -1,45 +1,49 @@
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <iostream>
+
+void fb_size_callback(GLFWwindow* window, int width, int height);
+void update(GLFWwindow* window);
 
 int main(void)
 {
-    GLFWwindow* window;
-
-    /* Initialize the library */
     if (!glfwInit())
-        return -1;
+        return EXIT_FAILURE;
 
-    /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-    if (!window)
-    {
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
+
+    GLFWwindow *window = glfwCreateWindow(800, 600, "OpenGL Project", nullptr, nullptr);
+    if (window == nullptr) {
+        std::cout << "Failed to create a window!\n";
         glfwTerminate();
-        return -1;
+        return EXIT_FAILURE;
     }
 
-    /* Make the window's context current */
     glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, fb_size_callback);
 
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window))
-    {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        std::cout << "Failed to init GLAD\n";
+        glfwTerminate();
+        return EXIT_FAILURE;
+    }
 
-        glBegin(GL_TRIANGLES);
-
-        glVertex2f(-0.5f, -0.5f);
-        glVertex2f(0.0f, 0.5f);
-        glVertex2f(0.5f, -0.5f);
-
-        glEnd();
-
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll for and process events */
+    while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
+        update(window);
+        glfwSwapBuffers(window);
     }
 
     glfwTerminate();
-    return 0;
+    return EXIT_SUCCESS;
+}
+
+void fb_size_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+}
+
+void update(GLFWwindow* window) {
+
 }
