@@ -4,4 +4,11 @@
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\glad.c" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\lib\Shader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\shaders\fragmentShader.fsh" />
+    <None Include="resources\shaders\vertexShader.vsh" />
+  </ItemGroup>
 </Project>

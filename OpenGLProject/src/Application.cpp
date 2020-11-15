@@ -1,32 +1,12 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <lib/Shader.h>
 
 void fb_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void update(GLFWwindow* window);
 
-const char *vertexShaderSource = R"S(
-#version 330 core
-
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec2 aOff;
-void main() {
-    gl_Position = vec4(aPos.x + aOff.x, aPos.y + aOff.y, aPos.z, 1.0);
-}
-
-)S";
-
-const char *fragmentShaderSource = R"S(
-#version 330 core
-
-out vec4 FragColor;
-
-void main() {
-    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-}
-
-)S";
 
 int main(void)
 {
@@ -55,61 +35,15 @@ int main(void)
         return EXIT_FAILURE;
     }
 
-    //Shader testing variables
-    int success = 0;
-    char infoLog[512];
-
-    //Initialize, compile and test vertex shader
-    unsigned vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-    
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
-            << infoLog << '\n';
-    }
-
-    //Initialize, compile and test fragment shader
-
-    unsigned fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-    glCompileShader(fragmentShader);
-
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
-            << infoLog << '\n';
-    }
-
-    //Create and test shader program from given shaders
-
-    unsigned shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
-            << infoLog << '\n';
-    }
-
-    //We don't need the shaders once program is created
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    Shader shader("resources/shaders/vertexShader.vsh", "resources/shaders/fragmentShader.fsh");
 
     //Shader data generation - vertex array, vertex buffer and element buffer
 
     float vertices[] = {
-        0.5f, 0.5f, 0.0f, 0.4f, 0.4f,
-        0.5f, -0.5f, 0.0f, 0.2f, 0.2f,
-        -0.5f, -0.5f, 0.0f, -0.2f, -0.2f,
-        -0.5f, 0.5f, 0.0f, 0.2f, 0.2f
+        0.5f, 0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+        -0.5f, 0.5f, 0.0f
     };
     unsigned indices[] = {
         0, 1, 3,
@@ -130,14 +64,12 @@ int main(void)
 
     //Tell the shader where in the buffer is which attribute of an object
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3*(sizeof(float))));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
 
     //We can now unbind data since it's all setup in out variables
     //(we still need element buffer though)
-
+ 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
@@ -148,7 +80,7 @@ int main(void)
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgram); //which program
+        shader.useProgram();
         glBindVertexArray(VAO); //which data
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); //draw
         
@@ -160,7 +92,7 @@ int main(void)
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-    glDeleteProgram(shaderProgram);
+    shader.deleteProgram();
     glfwTerminate();
     return EXIT_SUCCESS;
 }
