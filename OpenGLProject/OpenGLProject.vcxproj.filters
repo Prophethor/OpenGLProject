@@ -2,13 +2,27 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="src\Application.cpp" />
-    <ClCompile Include="src\glad.c" />
+    <ClCompile Include="include\GLAD\glad.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\lib\Shader.h" />
+    <ClInclude Include="include\lib\StbImg.h" />
+    <ClInclude Include="include\StbImg.h" />
+    <ClInclude Include="include\GLAD\khrplatform.h" />
+    <ClInclude Include="include\GLAD\glad.h" />
+    <ClInclude Include="include\GLFW\glfw3.h" />
+    <ClInclude Include="include\GLFW\glfw3native.h" />
+    <ClInclude Include="include\lib\Texture.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="resources\shaders\fragmentShader.fsh" />
-    <None Include="resources\shaders\vertexShader.vsh" />
+    <None Include="resources\shaders\fragmentShader.fs.glsl" />
+    <None Include="resources\shaders\vertexShader.vs.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\textures\container.jpg" />
+    <Image Include="resources\textures\container2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="include\GLFW\lib-vc2019\glfw3.lib" />
   </ItemGroup>
 </Project>

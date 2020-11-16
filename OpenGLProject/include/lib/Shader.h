@@ -3,7 +3,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
-#include <glad/glad.h>
+#include <GLAD/glad.h>
 #include <iostream>
 
 using namespace std;
@@ -88,6 +88,10 @@ public:
     void deleteProgram() {
         glDeleteProgram(m_id);
         m_id = 0;
+    }
+
+    unsigned int GetID() {
+        return m_id;
     }
 
 };
