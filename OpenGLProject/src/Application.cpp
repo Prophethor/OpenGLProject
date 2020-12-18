@@ -5,12 +5,18 @@
 #include <lib/Texture.h>
 #include <iostream>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 void fb_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void update(GLFWwindow* window);
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+
+using namespace glm;
 
 int main() {
 
@@ -21,7 +27,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    // Create window
+    // Create window, context and connect callbacks
 
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (window == NULL) {
@@ -51,7 +57,7 @@ int main() {
          0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
          0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
         -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
+        -0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 1.0f  // top left
     };
     unsigned int indices[] = {
         0, 1, 3, // first triangle
@@ -81,36 +87,45 @@ int main() {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-
     // Load and create textures
 
-    Texture tex1("resources/textures/container.jpg", GL_REPEAT, GL_LINEAR, GL_RGB);
-    Texture tex2("resources/textures/container2.png", GL_REPEAT, GL_LINEAR, GL_RGBA);
+    Texture tex1("resources/textures/container2.png", GL_REPEAT, GL_LINEAR, GL_RGBA);
 
     // Set uniform shader variables
 
     shader.useProgram(); 
-    glUniform1i(glGetUniformLocation(shader.GetID(), "tex1"), 0);
-    glUniform1i(glGetUniformLocation(shader.GetID(), "tex2"), 1);
+    //glUniform1i(glGetUniformLocation(shader.GetID(), "tex1"), 0); //sets texture unit
+
 
     //Execute this loop until window should close
 
     while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
+        
+        //input
         update(window);
+
+        //Apply transformations
+
+        mat4 transform = mat4(1.0f);
+        transform = translate(transform, vec3(0.5f, -0.5f, 0.0f));
+        transform = rotate(transform, (float)glfwGetTime(), vec3(0.0f, 0.0f, 1.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.GetID(), "transform"), 1, GL_FALSE, value_ptr(transform));
+
+        //rendering commands
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glActiveTexture(GL_TEXTURE0);
+        //glActiveTexture(GL_TEXTURE0); //selects texture by texture unit
         tex1.Bind();
-        glActiveTexture(GL_TEXTURE1);
-        tex2.Bind();
 
         shader.useProgram();
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+        //check events, swap buffers
+
+        glfwPollEvents();
         glfwSwapBuffers(window);
     }
 
@@ -126,7 +141,9 @@ int main() {
 
 // Update window state
 
-void update(GLFWwindow* window) {}
+void update(GLFWwindow* window) {
+    
+}
 
 // Whenever window is resized adjust the viewport
 

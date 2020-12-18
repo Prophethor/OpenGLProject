@@ -18,10 +18,10 @@ string readFileFromPath(string filePath) {
 class Shader {
 
     unsigned int m_id;
-	 
+
 public:
 
-	Shader(string vertexShaderPath, string fragmentShaderPath) {
+    Shader(string vertexShaderPath, string fragmentShaderPath) {
 
         //Shader testing variables
         int success = 0;
@@ -30,7 +30,7 @@ public:
         //Read shader code from files and convert them to C strings for later use
         string vsFileContent = readFileFromPath(vertexShaderPath);
         string fsFileContent = readFileFromPath(fragmentShaderPath);
-        const char *vertexShaderSource = vsFileContent.c_str();
+        const char* vertexShaderSource = vsFileContent.c_str();
         const char* fragmentShaderSource = fsFileContent.c_str();
 
         //Initialize, compile and test vertex shader
@@ -79,7 +79,7 @@ public:
 
         //Finally we save the ID of the created shader program
         m_id = shaderProgram;
-	}
+    }
 
     void useProgram() {
         glUseProgram(m_id);
@@ -92,6 +92,10 @@ public:
 
     unsigned int GetID() {
         return m_id;
+    }
+
+    void set4Float(const string& name, float x, float y, float z, float w) {
+        glUniform4f(glGetUniformLocation(m_id,name.c_str()), x, y, z, w);
     }
 
 };
