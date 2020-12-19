@@ -3,20 +3,37 @@
 #include <StbImg.h>
 #include <lib/Shader.h>
 #include <lib/Texture.h>
+#include <lib/Camera.h>
 #include <iostream>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+using namespace glm;
+
+// Declare callbacks
+
 void fb_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void update(GLFWwindow* window);
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-using namespace glm;
+// Initialize camera
+
+Camera camera(vec3(0.0f, 0.0f, 3.0f));
+float lastX = SCR_WIDTH / 2.0f;
+float lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
+
+// Deltatime variables
+
+float deltaTime = 0.0f; // Time between current frame and last frame
+float lastFrame = 0.0f; // Time of last frame
 
 int main() {
 
@@ -38,6 +55,9 @@ int main() {
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, fb_size_callback);
     glfwSetKeyCallback(window, key_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Initialize GLAD and load all OpenGL function pointers
 
@@ -46,6 +66,10 @@ int main() {
         return EXIT_FAILURE;
     }
 
+    // Enable depth testing
+
+    glEnable(GL_DEPTH_TEST);
+
     // Build and compile our shader program
 
     Shader shader("resources/shaders/vertexShader.vs.glsl", "resources/shaders/fragmentShader.fs.glsl");
@@ -53,18 +77,65 @@ int main() {
     // Setup shader data
 
     float vertices[] = {
-        // positions          // colors           // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 0.0f,   0.0f, 1.0f  // top left
-    };
-    unsigned int indices[] = {
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
+        -0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,   0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,   0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,   0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,   0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,   0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,   0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,   1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,   0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,   0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,   0.0f, 1.0f
     };
 
-    unsigned int VBO, VAO, EBO;
+    vec3 cubePositions[] = {
+        vec3(0.0f, 0.0f, 0.0f),
+        vec3(2.0f, 5.0f, -15.0f),
+        vec3(-1.5f, -2.2f, -2.5f),
+        vec3(-3.8f, -2.0f, -12.3f),
+        vec3(2.4f, -0.4f, -3.5f),
+        vec3(-1.7f, 3.0f, -7.5f),
+        vec3(1.3f, -2.0f, -2.5f),
+        vec3(1.5f, 2.0f, -2.5f),
+        vec3(1.5f, 0.2f, -1.5f),
+        vec3(-1.3f, 1.0f, -1.5f)
+    };
+
+    // Configure vertex array and buffers
+
+    unsigned int VBO, VAO;
 
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -73,25 +144,19 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
     
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
     // texture coord attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
-    // Load and create textures
+    // Load and create texture
 
     Texture tex1("resources/textures/container2.png", GL_REPEAT, GL_LINEAR, GL_RGBA);
 
-    // Set uniform shader variables
+    // Start shader program
 
     shader.useProgram(); 
     //glUniform1i(glGetUniformLocation(shader.GetID(), "tex1"), 0); //sets texture unit
@@ -100,28 +165,52 @@ int main() {
     //Execute this loop until window should close
 
     while (!glfwWindowShouldClose(window)) {
+
+        //Update deltatime
+
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
         
         //input
         update(window);
 
-        //Apply transformations
-
-        mat4 transform = mat4(1.0f);
-        transform = translate(transform, vec3(0.5f, -0.5f, 0.0f));
-        transform = rotate(transform, (float)glfwGetTime(), vec3(0.0f, 0.0f, 1.0f));
-        glUniformMatrix4fv(glGetUniformLocation(shader.GetID(), "transform"), 1, GL_FALSE, value_ptr(transform));
-
         //rendering commands
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //glActiveTexture(GL_TEXTURE0); //selects texture by texture unit
         tex1.Bind();
 
         shader.useProgram();
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //glBindVertexArray(VAO);
+
+        // Initialize transform matrices
+
+        const float radius = 10.0f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;
+        mat4 view = camera.GetViewMatrix();
+        mat4 projection = mat4(1.0f);
+        projection = perspective(radians(camera.Zoom), 800.0f / 600.0f, 0.1f, 100.0f);
+
+        // model init is in a loop so it makes one model matrix for every object
+
+        for (int i = 0; i < 10; i++) {
+            mat4 model = mat4(1.0f);
+            model = translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            if (i % 3 == 0)angle = (float)glfwGetTime() * 20.0f;
+            model = rotate(model, radians(angle), vec3(1.0f, 0.3f, 0.5f));
+            glUniformMatrix4fv(glGetUniformLocation(shader.GetID(), "model"), 1, GL_FALSE, value_ptr(model));
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+
+        // Send transform matrices to shader
+
+        glUniformMatrix4fv(glGetUniformLocation(shader.GetID(), "view"), 1, GL_FALSE, value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(shader.GetID(), "projection"), 1, GL_FALSE, value_ptr(projection));
 
         //check events, swap buffers
 
@@ -133,7 +222,6 @@ int main() {
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
     shader.deleteProgram();
     glfwTerminate();
     return EXIT_SUCCESS;
@@ -142,7 +230,14 @@ int main() {
 // Update window state
 
 void update(GLFWwindow* window) {
-    
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
 // Whenever window is resized adjust the viewport
@@ -157,4 +252,21 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, 1);
     }
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    camera.ProcessMouseMovement(xpos - lastX, lastY - ypos);
+    lastX = xpos;
+    lastY = ypos;
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    camera.ProcessMouseScroll(yoffset);
 }

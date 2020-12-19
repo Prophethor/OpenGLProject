@@ -450,6 +450,7 @@
     <ClInclude Include="include\glm\vec3.hpp" />
     <ClInclude Include="include\glm\vec4.hpp" />
     <ClInclude Include="include\glm\vector_relational.hpp" />
+    <ClInclude Include="include\lib\Camera.h" />
     <ClInclude Include="include\lib\Shader.h" />
     <ClInclude Include="include\lib\StbImg.h" />
     <ClInclude Include="include\lib\Texture.h" />
