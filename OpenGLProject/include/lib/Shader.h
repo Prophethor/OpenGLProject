@@ -6,6 +6,8 @@
 #include <GLAD/glad.h>
 #include <iostream>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 using namespace std;
 
 string readFileFromPath(string filePath) {
@@ -94,8 +96,21 @@ public:
         return m_id;
     }
 
+    void setFloat(const string& name, float x) {
+        glUniform1f(glGetUniformLocation(m_id, name.c_str()), x);
+    }
+
     void set4Float(const string& name, float x, float y, float z, float w) {
         glUniform4f(glGetUniformLocation(m_id,name.c_str()), x, y, z, w);
+    }
+
+    void set3Float(const string& name, float x, float y, float z) {
+        glUniform3f(glGetUniformLocation(m_id, name.c_str()), x, y, z);
+    }
+
+    void setMat4(const std::string& name, const glm::mat4& mat) const
+    {
+        glUniformMatrix4fv(glGetUniformLocation(m_id, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
 
 };

@@ -437,10 +437,13 @@
     <None Include="include\glm\gtx\vector_angle.inl" />
     <None Include="include\glm\gtx\vector_query.inl" />
     <None Include="include\glm\gtx\wrap.inl" />
+    <None Include="resources\shaders\lightVertexShader.vs.glsl" />
+    <None Include="resources\shaders\lightFragmentShader.fs.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\textures\container.jpg" />
     <Image Include="resources\textures\container2.png" />
+    <Image Include="resources\textures\container2_specular.png" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="include\GLFW\lib-vc2019\glfw3.lib" />
