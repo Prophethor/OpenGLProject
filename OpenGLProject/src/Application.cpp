@@ -73,6 +73,7 @@ int main() {
     // Build and compile our shader program
 
     Shader shader("resources/shaders/vertexShader.vs.glsl", "resources/shaders/fragmentShader.fs.glsl");
+    Shader lightShader("resources/shaders/lightVertexShader.vs.glsl", "resources/shaders/lightFragmentShader.fs.glsl");
     // Setup shader data
 
     float vertices[] = {
@@ -133,11 +134,11 @@ int main() {
         vec3(-1.3f, 1.0f, -1.5f)
     };
 
-    vec3 lightPos(-0.2f, -1.0f, -0.3f);
+    vec3 lightPos(1.0f, 3.0f, 5.0f);
 
     // Configure vertex array and buffers
 
-    unsigned int VBO, VAO;
+    unsigned int VBO, VAO, lightVAO;
 
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -153,6 +154,12 @@ int main() {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
+
+    glGenVertexArrays(1, &lightVAO);
+    glBindVertexArray(lightVAO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
     // Load and create texture
 
@@ -179,8 +186,12 @@ int main() {
         glUniform1i(glGetUniformLocation(shader.GetID(), "material.diffuse"), 0);
         glUniform1i(glGetUniformLocation(shader.GetID(), "material.specular"), 1);
 
-        shader.set3Float("light.direction", lightPos.x, lightPos.y, lightPos.z);
+        shader.set3Float("light.position", lightPos.x, lightPos.y, lightPos.z);
         shader.set3Float("viewPos", camera.Position.x, camera.Position.y, camera.Position.z);
+
+        shader.setFloat("light.constant", 1.0f);
+        shader.setFloat("light.linear", 0.09f);
+        shader.setFloat("light.quadratic", 0.032f);
         
         shader.set3Float("light.ambient", 0.2f, 0.2f, 0.2f);
         shader.set3Float("light.diffuse", 0.7f, 0.7f, 0.7f);
@@ -200,14 +211,23 @@ int main() {
         glBindVertexArray(VAO);
         for (unsigned int i = 0; i < 10; i++)
         {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle),
-                glm::vec3(1.0f, 0.3f, 0.5f));
+            mat4 model = mat4(1.0f);
+            model = translate(model, cubePositions[i]);
+            //float angle = 20.0f * i;
+            //model = glm::rotate(model, glm::radians(angle), vec3(1.0f, 0.3f, 0.5f));
             shader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+
+        lightShader.useProgram();
+        mat4 model = mat4(1.0f);
+        model = translate(model, lightPos);
+        lightShader.setMat4("model", model);
+        lightShader.setMat4("view", camera.GetViewMatrix());
+        lightShader.setMat4("projection", projection);
+
+        glBindVertexArray(lightVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         //check events, swap buffers
 
