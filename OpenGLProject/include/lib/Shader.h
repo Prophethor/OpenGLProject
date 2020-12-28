@@ -6,6 +6,7 @@
 #include <GLAD/glad.h>
 #include <iostream>
 
+#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 using namespace std;
@@ -96,6 +97,10 @@ public:
         return m_id;
     }
 
+    void setInt(const string& name, float x) {
+        glUniform1i(glGetUniformLocation(m_id, name.c_str()), x);
+    }
+
     void setFloat(const string& name, float x) {
         glUniform1f(glGetUniformLocation(m_id, name.c_str()), x);
     }
@@ -104,8 +109,12 @@ public:
         glUniform4f(glGetUniformLocation(m_id,name.c_str()), x, y, z, w);
     }
 
-    void set3Float(const string& name, float x, float y, float z) {
+    void setVec3(const string& name, float x, float y, float z) {
         glUniform3f(glGetUniformLocation(m_id, name.c_str()), x, y, z);
+    }
+
+    void setVec3(const string& name, glm::vec3& vector) {
+        glUniform3fv(glGetUniformLocation(m_id, name.c_str()), 1, &vector[0]);
     }
 
     void setMat4(const std::string& name, const glm::mat4& mat) const
