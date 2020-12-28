@@ -74,8 +74,12 @@ int main() {
 
     // Build and compile our shader program
 
-    Shader shader("resources/shaders/vertexShader.vs.glsl", "resources/shaders/fragmentShader.fs.glsl");
-    Shader lightShader("resources/shaders/lightVertexShader.vs.glsl", "resources/shaders/lightFragmentShader.fs.glsl");
+    //Shader shader("resources/shaders/vertexShader.vs.glsl", "resources/shaders/fragmentShader.fs.glsl");
+    //Shader lightShader("resources/shaders/lightVertexShader.vs.glsl", "resources/shaders/lightFragmentShader.fs.glsl");
+    Shader modelShader("resources/shaders/modelVertexShader.vs.glsl", "resources/shaders/modelFragmentShader.fs.glsl");
+    
+    Model myModel("resources/objects/backpack/backpack.obj");
+
     // Setup shader data
 
     float vertices[] = {
@@ -172,9 +176,9 @@ int main() {
     Texture tex1("resources/textures/container2.png", GL_REPEAT, GL_LINEAR, GL_RGBA);
     Texture tex2("resources/textures/container2_specular.png", GL_REPEAT, GL_LINEAR, GL_RGBA);
     
-    shader.useProgram();
-    shader.setInt("material.diffuse", 0);
-    shader.setInt("material.specular", 1);
+    //shader.useProgram();
+    //shader.setInt("material.diffuse", 0);
+    //shader.setInt("material.specular", 1);
 
     //Execute this loop until window should close
 
@@ -189,7 +193,7 @@ int main() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shader.useProgram();
+        /*shader.useProgram();
         shader.setVec3("viewPos", camera.Position);
         shader.setFloat("material.shininess", 32.0f);
 
@@ -231,9 +235,9 @@ int main() {
         shader.setFloat("pointLights[3].linear", 0.09);
         shader.setFloat("pointLights[3].quadratic", 0.032);
 
-        // view/projection transformations
+        // view/projection transformations*/
         mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        mat4 view = camera.GetViewMatrix();
+        mat4 view = camera.GetViewMatrix();/*
         shader.setMat4("projection", projection);
         shader.setMat4("view", view);
 
@@ -273,7 +277,17 @@ int main() {
             model = scale(model, vec3(0.2f)); // Make it a smaller cube
             lightShader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+        }*/
+
+        modelShader.useProgram();
+        modelShader.setMat4("projection", projection);
+        modelShader.setMat4("view", view);
+
+        mat4 model = mat4(1.0f);
+        model = translate(model, vec3(0.0f, 0.0f, 0.0f));
+        model = scale(model, vec3(0.5f, 0.5f, 0.5f));
+        modelShader.setMat4("model", model);
+        myModel.Draw(modelShader);
 
         //check events, swap buffers
 
@@ -285,7 +299,7 @@ int main() {
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    shader.deleteProgram();
+    //shader.deleteProgram();
     glfwTerminate();
     return EXIT_SUCCESS;
 }

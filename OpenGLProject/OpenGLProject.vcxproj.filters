@@ -487,6 +487,8 @@
     <None Include="include\assimp\vector2.inl" />
     <None Include="include\assimp\vector3.inl" />
     <None Include="resources\objects\backpack\backpack.mtl" />
+    <None Include="resources\shaders\modelFragmentShader.fs.glsl" />
+    <None Include="resources\shaders\modelVertexShader.vs.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\textures\container.jpg" />

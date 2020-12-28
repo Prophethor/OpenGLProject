@@ -644,6 +644,8 @@
     <None Include="resources\shaders\fragmentShader.fs.glsl" />
     <None Include="resources\shaders\lightFragmentShader.fs.glsl" />
     <None Include="resources\shaders\lightVertexShader.vs.glsl" />
+    <None Include="resources\shaders\modelFragmentShader.fs.glsl" />
+    <None Include="resources\shaders\modelVertexShader.vs.glsl" />
     <None Include="resources\shaders\vertexShader.vs.glsl" />
   </ItemGroup>
   <ItemGroup>
