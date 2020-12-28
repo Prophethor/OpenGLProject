@@ -96,12 +96,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\GLFW\include;$(SolutionDir)dependencies\GLAD\include;$(ProjectDir)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)include\GLFW\lib-vc2019</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)include\GLFW\lib-vc2019;$(ProjectDir)include\assimp\lib-vc2019</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;User32.lib;Gdi32.lib;Shell32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -113,14 +113,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\GLFW\include;$(SolutionDir)dependencies\GLAD\include;$(ProjectDir)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)include\GLFW\lib-vc2019</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)include\GLFW\lib-vc2019;$(ProjectDir)include\assimp\lib-vc2019</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;User32.lib;Gdi32.lib;Shell32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -130,12 +130,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\GLFW\include;$(SolutionDir)dependencies\GLAD\include;$(ProjectDir)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)include\GLFW\lib-vc2019</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)include\GLFW\lib-vc2019;$(ProjectDir)include\assimp\lib-vc2019</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;User32.lib;Gdi32.lib;Shell32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -147,14 +147,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\GLFW\include;$(SolutionDir)dependencies\GLAD\include;$(ProjectDir)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)include\GLFW\lib-vc2019</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)include\GLFW\lib-vc2019;$(ProjectDir)include\assimp\lib-vc2019</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;User32.lib;Gdi32.lib;Shell32.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -164,6 +164,43 @@
     <ClCompile Include="include\GLAD\glad.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\assimp\ai_assert.h" />
+    <ClInclude Include="include\assimp\anim.h" />
+    <ClInclude Include="include\assimp\camera.h" />
+    <ClInclude Include="include\assimp\cexport.h" />
+    <ClInclude Include="include\assimp\cfileio.h" />
+    <ClInclude Include="include\assimp\cimport.h" />
+    <ClInclude Include="include\assimp\color4.h" />
+    <ClInclude Include="include\assimp\Compiler\poppack1.h" />
+    <ClInclude Include="include\assimp\Compiler\pstdint.h" />
+    <ClInclude Include="include\assimp\Compiler\pushpack1.h" />
+    <ClInclude Include="include\assimp\config.h" />
+    <ClInclude Include="include\assimp\DefaultLogger.hpp" />
+    <ClInclude Include="include\assimp\defs.h" />
+    <ClInclude Include="include\assimp\Exporter.hpp" />
+    <ClInclude Include="include\assimp\Importer.hpp" />
+    <ClInclude Include="include\assimp\importerdesc.h" />
+    <ClInclude Include="include\assimp\IOStream.hpp" />
+    <ClInclude Include="include\assimp\IOSystem.hpp" />
+    <ClInclude Include="include\assimp\light.h" />
+    <ClInclude Include="include\assimp\Logger.hpp" />
+    <ClInclude Include="include\assimp\LogStream.hpp" />
+    <ClInclude Include="include\assimp\material.h" />
+    <ClInclude Include="include\assimp\matrix3x3.h" />
+    <ClInclude Include="include\assimp\matrix4x4.h" />
+    <ClInclude Include="include\assimp\mesh.h" />
+    <ClInclude Include="include\assimp\metadata.h" />
+    <ClInclude Include="include\assimp\NullLogger.hpp" />
+    <ClInclude Include="include\assimp\port\AndroidJNI\AndroidJNIIOSystem.h" />
+    <ClInclude Include="include\assimp\postprocess.h" />
+    <ClInclude Include="include\assimp\ProgressHandler.hpp" />
+    <ClInclude Include="include\assimp\quaternion.h" />
+    <ClInclude Include="include\assimp\scene.h" />
+    <ClInclude Include="include\assimp\texture.h" />
+    <ClInclude Include="include\assimp\types.h" />
+    <ClInclude Include="include\assimp\vector2.h" />
+    <ClInclude Include="include\assimp\vector3.h" />
+    <ClInclude Include="include\assimp\version.h" />
     <ClInclude Include="include\GLAD\glad.h" />
     <ClInclude Include="include\GLAD\khrplatform.h" />
     <ClInclude Include="include\GLFW\glfw3.h" />
@@ -451,12 +488,22 @@
     <ClInclude Include="include\glm\vec4.hpp" />
     <ClInclude Include="include\glm\vector_relational.hpp" />
     <ClInclude Include="include\lib\Camera.h" />
+    <ClInclude Include="include\lib\Mesh.h" />
+    <ClInclude Include="include\lib\Model.h" />
     <ClInclude Include="include\lib\Shader.h" />
     <ClInclude Include="include\lib\StbImg.h" />
     <ClInclude Include="include\lib\Texture.h" />
     <ClInclude Include="include\StbImg.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="include\assimp\.editorconfig" />
+    <None Include="include\assimp\color4.inl" />
+    <None Include="include\assimp\material.inl" />
+    <None Include="include\assimp\matrix3x3.inl" />
+    <None Include="include\assimp\matrix4x4.inl" />
+    <None Include="include\assimp\quaternion.inl" />
+    <None Include="include\assimp\vector2.inl" />
+    <None Include="include\assimp\vector3.inl" />
     <None Include="include\glm\detail\func_common.inl" />
     <None Include="include\glm\detail\func_common_simd.inl" />
     <None Include="include\glm\detail\func_exponential.inl" />
@@ -593,18 +640,36 @@
     <None Include="include\glm\gtx\vector_angle.inl" />
     <None Include="include\glm\gtx\vector_query.inl" />
     <None Include="include\glm\gtx\wrap.inl" />
+    <None Include="resources\objects\backpack\backpack.mtl" />
     <None Include="resources\shaders\fragmentShader.fs.glsl" />
     <None Include="resources\shaders\lightFragmentShader.fs.glsl" />
     <None Include="resources\shaders\lightVertexShader.vs.glsl" />
     <None Include="resources\shaders\vertexShader.vs.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="resources\objects\backpack\ao.jpg" />
+    <Image Include="resources\objects\backpack\diffuse.jpg" />
+    <Image Include="resources\objects\backpack\normal.png" />
+    <Image Include="resources\objects\backpack\roughness.jpg" />
+    <Image Include="resources\objects\backpack\specular.jpg" />
     <Image Include="resources\textures\container.jpg" />
     <Image Include="resources\textures\container2.png" />
     <Image Include="resources\textures\container2_specular.png" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="include\assimp\lib-vc2019\assimp.lib" />
     <Library Include="include\GLFW\lib-vc2019\glfw3.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="resources\objects\backpack\backpack.obj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Object>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="resources\objects\backpack\source_attribution.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
