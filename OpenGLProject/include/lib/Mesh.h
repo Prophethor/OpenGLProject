@@ -25,7 +25,7 @@ struct Vertex {
     glm::vec3 Bitangent;
 };
 
-struct Texture {
+struct SimpleTexture {
     unsigned int id;
     string type;
     string path;
@@ -36,11 +36,11 @@ public:
     // mesh Data
     vector<Vertex>       vertices;
     vector<unsigned int> indices;
-    vector<Texture>      textures;
+    vector<SimpleTexture>      textures;
     unsigned int VAO;
 
     // constructor
-    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
+    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<SimpleTexture> textures)
     {
         this->vertices = vertices;
         this->indices = indices;
@@ -74,7 +74,7 @@ public:
                 number = std::to_string(heightNr++); // transfer unsigned int to stream
 
             // now set the sampler to the correct texture unit
-            glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+            glUniform1i(glGetUniformLocation(shader.GetID(), (name + number).c_str()), i);
             // and finally bind the texture
             glBindTexture(GL_TEXTURE_2D, textures[i].id);
         }
