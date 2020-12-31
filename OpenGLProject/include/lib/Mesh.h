@@ -1,7 +1,4 @@
-#ifndef MESH_H
-#define MESH_H
-
-#include <glad/glad.h> // holds all OpenGL type declarations
+#include <glad/glad.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -25,7 +22,9 @@ struct Vertex {
     glm::vec3 Bitangent;
 };
 
-struct SimpleTexture {
+
+
+struct Texture {
     unsigned int id;
     string type;
     string path;
@@ -36,11 +35,12 @@ public:
     // mesh Data
     vector<Vertex>       vertices;
     vector<unsigned int> indices;
-    vector<SimpleTexture>      textures;
-    unsigned int VAO;
+    vector<Texture>      textures;
 
+    unsigned int VAO;
+    std::string glslIdentifierPrefix;
     // constructor
-    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<SimpleTexture> textures)
+    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
     {
         this->vertices = vertices;
         this->indices = indices;
@@ -74,10 +74,12 @@ public:
                 number = std::to_string(heightNr++); // transfer unsigned int to stream
 
             // now set the sampler to the correct texture unit
-            glUniform1i(glGetUniformLocation(shader.GetID(), (name + number).c_str()), i);
+            glUniform1i(glGetUniformLocation(shader.GetID(), (glslIdentifierPrefix + name + number).c_str()), i);
             // and finally bind the texture
             glBindTexture(GL_TEXTURE_2D, textures[i].id);
         }
+
+
 
         // draw mesh
         glBindVertexArray(VAO);
@@ -89,7 +91,7 @@ public:
     }
 
 private:
-    // render data 
+    // render data
     unsigned int VBO, EBO;
 
     // initializes all the buffer objects/arrays
@@ -131,4 +133,3 @@ private:
         glBindVertexArray(0);
     }
 };
-#endif

@@ -1,8 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <StbImg.h>
+#include <stb_image.h>
 #include <lib/Shader.h>
-#include <lib/Texture.h>
 #include <lib/Camera.h>
 #include <lib/Model.h>
 #include <lib/Error.h>
@@ -14,7 +13,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-using namespace glm;
 
 // Declare callbacks
 
@@ -23,6 +21,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void update(GLFWwindow* window);
+unsigned int loadTexture(const char* path);
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -50,7 +49,7 @@ int main() {
 
     // Create window, context and connect callbacks
 
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "OpenGLProject", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -78,9 +77,9 @@ int main() {
 
     Shader shader("resources/shaders/vertexShader.vs.glsl", "resources/shaders/fragmentShader.fs.glsl");
     Shader lightShader("resources/shaders/lightVertexShader.vs.glsl", "resources/shaders/lightFragmentShader.fs.glsl");
-    //Shader modelShader("resources/shaders/modelVertexShader.vs.glsl", "resources/shaders/modelFragmentShader.fs.glsl");
+    Shader modelShader("resources/shaders/modelVertexShader.vs.glsl", "resources/shaders/modelFragmentShader.fs.glsl");
     
-    //Model myModel("resources/objects/backpack/backpack.obj");
+    Model myModel("resources/objects/cyborg/cyborg.obj");
 
     // Setup shader data
 
@@ -175,13 +174,13 @@ int main() {
 
     // Load and create texture
 
-    Texture tex1("resources/textures/container2.png", GL_REPEAT, GL_LINEAR, GL_RGBA);
-    Texture tex2("resources/textures/container2_specular.png", GL_REPEAT, GL_LINEAR, GL_RGBA);
+    unsigned int containerDiffuse = loadTexture("resources/textures/container2.png");
+    unsigned int containerSpecular = loadTexture("resources/textures/container2_specular.png");
     
     shader.useProgram();
     shader.setInt("material.diffuse", 0);
     shader.setInt("material.specular", 1);
-
+    
     //Execute this loop until window should close
 
     while (!glfwWindowShouldClose(window)) {
@@ -237,6 +236,44 @@ int main() {
         shader.setFloat("pointLights[3].linear", 0.09);
         shader.setFloat("pointLights[3].quadratic", 0.032);
 
+        // directional light
+        modelShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+        modelShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+        modelShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+        modelShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+        // point light 1
+        modelShader.setVec3("pointLights[0].position", pointLightPositions[0]);
+        modelShader.setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
+        modelShader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
+        modelShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+        modelShader.setFloat("pointLights[0].constant", 1.0f);
+        modelShader.setFloat("pointLights[0].linear", 0.09);
+        modelShader.setFloat("pointLights[0].quadratic", 0.032);
+        // point light 2
+        modelShader.setVec3("pointLights[1].position", pointLightPositions[1]);
+        modelShader.setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
+        modelShader.setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
+        modelShader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+        modelShader.setFloat("pointLights[1].constant", 1.0f);
+        modelShader.setFloat("pointLights[1].linear", 0.09);
+        modelShader.setFloat("pointLights[1].quadratic", 0.032);
+        // point light 3
+        modelShader.setVec3("pointLights[2].position", pointLightPositions[2]);
+        modelShader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
+        modelShader.setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
+        modelShader.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
+        modelShader.setFloat("pointLights[2].constant", 1.0f);
+        modelShader.setFloat("pointLights[2].linear", 0.09);
+        modelShader.setFloat("pointLights[2].quadratic", 0.032);
+        // point light 4
+        modelShader.setVec3("pointLights[3].position", pointLightPositions[3]);
+        modelShader.setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
+        modelShader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
+        modelShader.setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
+        modelShader.setFloat("pointLights[3].constant", 1.0f);
+        modelShader.setFloat("pointLights[3].linear", 0.09);
+        modelShader.setFloat("pointLights[3].quadratic", 0.032);
+
         // view/projection transformations
         mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         mat4 view = camera.GetViewMatrix();
@@ -245,12 +282,11 @@ int main() {
         
         // bind diffuse map
         glActiveTexture(GL_TEXTURE0);
-        tex1.Bind();
-        glBindTexture(GL_TEXTURE_2D, tex1.GetID());
+        glBindTexture(GL_TEXTURE_2D, containerDiffuse);
+        
         // bind specular map
         glActiveTexture(GL_TEXTURE1);
-        tex2.Bind();
-        glBindTexture(GL_TEXTURE_2D, tex2.GetID());
+        glBindTexture(GL_TEXTURE_2D, containerSpecular);
         
         glBindVertexArray(VAO);
         for (unsigned int i = 0; i < 10; i++)
@@ -281,15 +317,19 @@ int main() {
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
-        /*modelShader.useProgram();
+        modelShader.useProgram();
         modelShader.setMat4("projection", projection);
         modelShader.setMat4("view", view);
-
+        modelShader.setVec3("lightDir", -0.2f, -1.0f, -0.3f);
+        modelShader.setVec3("viewPos", camera.Position);
+        modelShader.setVec3("ambientIntensity", 0.05f, 0.05f, 0.05f);
+        modelShader.setVec3("ambientIntensity", 0.4f, 0.4f, 0.4f);
+        modelShader.setVec3("ambientIntensity", 0.5f, 0.5f, 0.5f);
         mat4 model = mat4(1.0f);
-        model = translate(model, vec3(0.0f, 0.0f, 0.0f));
-        model = scale(model, vec3(0.5f, 0.5f, 0.5f));
+        model = translate(model, vec3(0.0f, -3.0f, -4.0f));
+        model = scale(model, vec3(1.0f, 1.0f, 1.0f));
         modelShader.setMat4("model", model);
-        myModel.Draw(modelShader);*/
+        myModel.Draw(modelShader);
 
         //check events, swap buffers
 
@@ -348,4 +388,41 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     camera.ProcessMouseScroll(yoffset);
+}
+
+unsigned int loadTexture(char const* path)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int width, height, nrComponents;
+    unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
+    if (data)
+    {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: " << path << std::endl;
+        stbi_image_free(data);
+    }
+
+    return textureID;
 }

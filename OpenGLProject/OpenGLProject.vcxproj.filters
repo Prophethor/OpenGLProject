@@ -4,16 +4,15 @@
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="include\GLAD\glad.c" />
     <ClCompile Include="include\glm\detail\glm.cpp" />
+    <ClCompile Include="src\std_image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\lib\Shader.h" />
     <ClInclude Include="include\lib\StbImg.h" />
-    <ClInclude Include="include\StbImg.h" />
     <ClInclude Include="include\GLAD\khrplatform.h" />
     <ClInclude Include="include\GLAD\glad.h" />
     <ClInclude Include="include\GLFW\glfw3.h" />
     <ClInclude Include="include\GLFW\glfw3native.h" />
-    <ClInclude Include="include\lib\Texture.h" />
     <ClInclude Include="include\glm\detail\_features.hpp" />
     <ClInclude Include="include\glm\detail\_fixes.hpp" />
     <ClInclude Include="include\glm\detail\_noise.hpp" />
@@ -337,6 +336,7 @@
     <ClInclude Include="include\lib\Model.h" />
     <ClInclude Include="include\lib\Mesh.h" />
     <ClInclude Include="include\lib\Error.h" />
+    <ClInclude Include="include\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\fragmentShader.fs.glsl" />
@@ -487,28 +487,28 @@
     <None Include="include\assimp\quaternion.inl" />
     <None Include="include\assimp\vector2.inl" />
     <None Include="include\assimp\vector3.inl" />
-    <None Include="resources\objects\backpack\backpack.mtl" />
     <None Include="resources\shaders\modelFragmentShader.fs.glsl" />
     <None Include="resources\shaders\modelVertexShader.vs.glsl" />
+    <None Include="resources\objects\cyborg\cyborg.blend" />
+    <None Include="resources\objects\cyborg\cyborg.blend1" />
+    <None Include="resources\objects\cyborg\cyborg.mtl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\textures\container.jpg" />
     <Image Include="resources\textures\container2.png" />
     <Image Include="resources\textures\container2_specular.png" />
-    <Image Include="resources\objects\backpack\ao.jpg" />
-    <Image Include="resources\objects\backpack\diffuse.jpg" />
-    <Image Include="resources\objects\backpack\normal.png" />
-    <Image Include="resources\objects\backpack\roughness.jpg" />
-    <Image Include="resources\objects\backpack\specular.jpg" />
+    <Image Include="resources\objects\cyborg\cyborg_diffuse.png" />
+    <Image Include="resources\objects\cyborg\cyborg_normal.png" />
+    <Image Include="resources\objects\cyborg\cyborg_specular.png" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="include\GLFW\lib-vc2019\glfw3.lib" />
     <Library Include="include\assimp\lib-vc2019\assimp.lib" />
   </ItemGroup>
   <ItemGroup>
-    <Object Include="resources\objects\backpack\backpack.obj" />
+    <Object Include="resources\objects\cyborg\cyborg.obj" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="resources\objects\backpack\source_attribution.txt" />
+    <Text Include="resources\objects\cyborg\LICENSE.txt" />
   </ItemGroup>
 </Project>
