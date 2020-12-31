@@ -336,6 +336,7 @@
     <ClInclude Include="include\assimp\version.h" />
     <ClInclude Include="include\lib\Model.h" />
     <ClInclude Include="include\lib\Mesh.h" />
+    <ClInclude Include="include\lib\Error.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\fragmentShader.fs.glsl" />

@@ -488,6 +488,7 @@
     <ClInclude Include="include\glm\vec4.hpp" />
     <ClInclude Include="include\glm\vector_relational.hpp" />
     <ClInclude Include="include\lib\Camera.h" />
+    <ClInclude Include="include\lib\Error.h" />
     <ClInclude Include="include\lib\Mesh.h" />
     <ClInclude Include="include\lib\Model.h" />
     <ClInclude Include="include\lib\Shader.h" />

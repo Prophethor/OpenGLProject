@@ -1,12 +1,19 @@
 ﻿  Application.cpp
-C:\Dev\OpenGLProject\OpenGLProject\include\lib\Shader.h(101,63): warning C4244: 'argument': conversion from 'float' to 'GLint', possible loss of data
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(187,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(337,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(338,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(342,53): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(342,38): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(343,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(344,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(348,31): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(189,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(213,54): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(214,58): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(221,54): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(222,58): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(229,54): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(230,58): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(237,54): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(238,58): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(339,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(340,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(344,53): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(344,38): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(345,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(346,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(350,31): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   OpenGLProject.vcxproj -> C:\Dev\OpenGLProject\bin\Win32\Debug\OpenGLProject.exe
