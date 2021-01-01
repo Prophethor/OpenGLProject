@@ -512,6 +512,7 @@
     <ClInclude Include="include\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="imgui.ini" />
     <None Include="include\assimp\.editorconfig" />
     <None Include="include\assimp\color4.inl" />
     <None Include="include\assimp\material.inl" />

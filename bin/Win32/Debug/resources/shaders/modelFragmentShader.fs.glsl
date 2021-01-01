@@ -16,14 +16,14 @@ uniform vec3 specularIntensity;
 
 void main()
 {    
-    float diff = max(dot(myNormal, lightDir), 0.0);
-    // specular shading
-    vec3 reflectDir = reflect(-lightDir, myNormal);
+    float diff = max(dot(myNormal, -lightDir), 0.0);
+    
+    vec3 reflectDir = normalize(reflect(-lightDir, myNormal));
     vec3 viewDir = normalize(viewPos-FragPos);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0f);
-    // combine results
-    vec3 ambient = ambientIntensity * texture(texture_diffuse1, myTexPos).rgb;
-    vec3 diffuse = diffuseIntensity * diff * texture(texture_diffuse1, myTexPos).rgb;
-    vec3 specular = specularIntensity * spec * texture(texture_specular1, myTexPos).rgb;
+    
+    vec3 ambient = ambientIntensity * vec3(texture(texture_diffuse1, myTexPos));
+    vec3 diffuse = diffuseIntensity * diff * vec3(texture(texture_diffuse1, myTexPos));
+    vec3 specular = specularIntensity * spec * vec3(texture(texture_specular1, myTexPos));
     FragColor = vec4(ambient+diffuse+specular,1.0f);
 }

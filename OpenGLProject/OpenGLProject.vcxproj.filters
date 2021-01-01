@@ -507,6 +507,7 @@
     <None Include="resources\objects\cyborg\cyborg.blend" />
     <None Include="resources\objects\cyborg\cyborg.blend1" />
     <None Include="resources\objects\cyborg\cyborg.mtl" />
+    <None Include="imgui.ini" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\textures\container.jpg" />

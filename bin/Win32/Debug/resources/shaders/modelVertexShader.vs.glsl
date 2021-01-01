@@ -13,6 +13,7 @@ uniform mat4 projection;
 
 void main()
 {
-    myTexPos = aTexPos;    
+    myTexPos = aTexPos;
+    myNormal = mat3(transpose(inverse(model)))*aNormal;
     gl_Position = projection * view * model * vec4(aPos, 1.0);
 }

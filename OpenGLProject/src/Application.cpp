@@ -38,6 +38,7 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 8);
 
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "OpenGLProject", NULL, NULL);
     if (window == NULL) {
@@ -50,7 +51,7 @@ int main() {
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
@@ -58,6 +59,7 @@ int main() {
     }
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
 
     Shader shader("resources/shaders/vertexShader.vs.glsl", "resources/shaders/fragmentShader.fs.glsl");
     Shader lightShader("resources/shaders/lightVertexShader.vs.glsl", "resources/shaders/lightFragmentShader.fs.glsl");
@@ -315,8 +317,8 @@ int main() {
         modelShader.setVec3("lightDir", -0.2f, -1.0f, -0.3f);
         modelShader.setVec3("viewPos", camera.Position);
         modelShader.setVec3("ambientIntensity", 0.05f, 0.05f, 0.05f);
-        modelShader.setVec3("ambientIntensity", 0.4f, 0.4f, 0.4f);
-        modelShader.setVec3("ambientIntensity", 0.5f, 0.5f, 0.5f);
+        modelShader.setVec3("diffuseIntensity", 0.6f, 0.6f, 0.6f);
+        modelShader.setVec3("specularIntensity", 0.3f, 0.3f, 0.3f);
         mat4 model = mat4(1.0f);
         model = translate(model, vec3(0.0f, -3.0f, -4.0f));
         model = scale(model, vec3(1.0f, 1.0f, 1.0f));
