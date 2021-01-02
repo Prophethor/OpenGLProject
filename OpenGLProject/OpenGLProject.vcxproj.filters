@@ -510,6 +510,7 @@
     <None Include="imgui.ini" />
     <None Include="resources\shaders\screenVertexShader.vs.glsl" />
     <None Include="resources\shaders\screenFragmentShader.fs.glsl" />
+    <None Include="resources\objects\planet\planet.mtl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\textures\container.jpg" />
@@ -518,6 +519,7 @@
     <Image Include="resources\objects\cyborg\cyborg_diffuse.png" />
     <Image Include="resources\objects\cyborg\cyborg_normal.png" />
     <Image Include="resources\objects\cyborg\cyborg_specular.png" />
+    <Image Include="resources\objects\planet\mars.png" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="include\GLFW\lib-vc2019\glfw3.lib" />
@@ -525,8 +527,10 @@
   </ItemGroup>
   <ItemGroup>
     <Object Include="resources\objects\cyborg\cyborg.obj" />
+    <Object Include="resources\objects\planet\planet.obj" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="resources\objects\cyborg\LICENSE.txt" />
+    <Text Include="resources\objects\planet\source.txt" />
   </ItemGroup>
 </Project>

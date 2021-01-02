@@ -24,13 +24,106 @@ unsigned int loadTexture(const char* path);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-Camera camera(vec3(0.0f, 0.0f, 3.0f));
+struct DirLight {
+    vec3 direction;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+
+    DirLight(vec3 dir) {
+        direction = dir;
+        ambient = vec3(0.1, 0.1, 0.1);
+        diffuse = vec3(0.6, 0.6, 0.6);
+        specular = vec3(1.0, 1.0, 1.0);
+    }             
+};
+
+struct PointLight {
+
+    vec3 position;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
+
+    PointLight(vec3 pos) {
+        position = pos;
+        ambient = vec3(0.1, 0.1, 0.1);
+        diffuse = vec3(0.6, 0.6, 0.6);
+        specular = vec3(1.0, 1.0, 1.0);
+        constant = 1.0f;
+        linear = 0.09f;
+        quadratic = 0.032f;
+    }
+};
+
+struct ProgramState {
+    glm::vec3 clearColor = glm::vec3(0);
+    bool antiAliasing = false;
+    bool grayScale = false;
+    bool imGuiEnabled = false;
+    DirLight dirLight;
+    PointLight pointLight;
+    ProgramState()
+        :
+        dirLight(vec3(0.0f,0.0f,0.0f)),
+        pointLight(vec3(0.0f,0.0f,-3.0f))
+    {}
+
+    void SaveToFile(std::string filename);
+
+    void LoadFromFile(std::string filename);
+};
+
+void ProgramState::SaveToFile(std::string filename) {
+    std::ofstream out(filename);
+    out << clearColor.r << '\n'
+        << clearColor.g << '\n'
+        << clearColor.b << '\n'
+        << antiAliasing << '\n'
+        << grayScale << '\n'
+        << imGuiEnabled << '\n'
+        << dirLight.direction.x << '\n'
+        << dirLight.direction.y << '\n'
+        << dirLight.direction.z << '\n'
+        << pointLight.position.x << '\n'
+        << pointLight.position.y << '\n'
+        << pointLight.position.z << '\n';
+}
+
+void ProgramState::LoadFromFile(std::string filename) {
+    std::ifstream in(filename);
+    if (in) {
+        in >> clearColor.r
+            >> clearColor.g
+            >> clearColor.b
+            >> antiAliasing
+            >> grayScale
+            >> imGuiEnabled
+            >> dirLight.direction.x
+            >> dirLight.direction.y
+            >> dirLight.direction.z
+            >> pointLight.position.x
+            >> pointLight.position.y
+            >> pointLight.position.z;
+    }
+}
+
+ProgramState* programState;
+
+Camera camera(vec3(0.0f,0.0f,3.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
 float deltaTime = 0.0f; // Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
+
+void DrawImGui(ProgramState* programState);
 
 int main() {
 
@@ -58,6 +151,20 @@ int main() {
     }
 
     glEnable(GL_DEPTH_TEST);
+
+    programState = new ProgramState;
+    programState->LoadFromFile("resources/program_state.txt");
+    if (programState->imGuiEnabled) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330 core");
+
 
     Shader shader("resources/shaders/vertexShader.vs.glsl", "resources/shaders/fragmentShader.fs.glsl");
     Shader lightShader("resources/shaders/lightVertexShader.vs.glsl", "resources/shaders/lightFragmentShader.fs.glsl");
@@ -112,11 +219,8 @@ int main() {
 
     vec3 cubePositions[] = {
         vec3(0.0f, 0.0f, 0.0f),
-        vec3(2.0f, 5.0f, -15.0f),
         vec3(-1.5f, -2.2f, -2.5f),
-        vec3(-3.8f, -2.0f, -12.3f),
         vec3(2.4f, -0.4f, -3.5f),
-        vec3(-1.7f, 3.0f, -7.5f),
         vec3(1.3f, -2.0f, -2.5f),
         vec3(1.5f, 2.0f, -2.5f),
         vec3(1.5f, 0.2f, -1.5f),
@@ -124,8 +228,7 @@ int main() {
     };
 
 
-    vec3 dirLightDirection = vec3(1.0f, -1.0f, -1.0f);
-    vec3 pointLightPosition = vec3(0.0f, 0.0f, -3.0f);
+    
 
     float quadVertices[] = {   // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
         // positions   // texCoords
@@ -180,14 +283,14 @@ int main() {
     unsigned int screenTexture;
     glGenTextures(1, &screenTexture);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, screenTexture);
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, SCR_WIDTH, SCR_HEIGHT, GL_TRUE);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGB, SCR_WIDTH, SCR_HEIGHT, GL_TRUE);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, screenTexture, 0);
     // create a (also multisampled) renderbuffer object for depth and stencil attachments
     unsigned int rbo;
     glGenRenderbuffers(1, &rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 8, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
@@ -205,13 +308,6 @@ int main() {
     
     //Execute this loop until window should close
 
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    ImGui::StyleColorsDark();
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 330 core");
-
     vec3 clearColor = vec3(0.1f, 0.1f, 0.1f);
 
     while (!glfwWindowShouldClose(window)) {
@@ -222,15 +318,8 @@ int main() {
         
         update(window);
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(programState->clearColor.r, programState->clearColor.g, programState->clearColor.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
 
@@ -239,19 +328,19 @@ int main() {
         shader.setFloat("material.shininess", 32.0f);
 
         // directional light
-        shader.setVec3("dirLight.direction", dirLightDirection);
-        shader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-        shader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-        shader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+        shader.setVec3("dirLight.direction", programState->dirLight.direction);
+        shader.setVec3("dirLight.ambient", programState->dirLight.ambient);
+        shader.setVec3("dirLight.diffuse", programState->dirLight.diffuse);
+        shader.setVec3("dirLight.specular", programState->dirLight.specular);
         // point light
         shader.setVec3("viewPos", camera.Position);
-        shader.setVec3("pointLight.position", pointLightPosition);
-        shader.setVec3("pointLight.ambient", 0.05f, 0.05f, 0.05f);
-        shader.setVec3("pointLight.diffuse", 0.8f, 0.8f, 0.8f);
-        shader.setVec3("pointLight.specular", 1.0f, 1.0f, 1.0f);
-        shader.setFloat("pointLight.constant", 1.0f);
-        shader.setFloat("pointLight.linear", 0.09);
-        shader.setFloat("pointLight.quadratic", 0.032);
+        shader.setVec3("pointLight.position", programState->pointLight.position);
+        shader.setVec3("pointLight.ambient", programState->pointLight.ambient);
+        shader.setVec3("pointLight.diffuse", programState->pointLight.diffuse);
+        shader.setVec3("pointLight.specular", programState->pointLight.specular);
+        shader.setFloat("pointLight.constant", programState->pointLight.constant);
+        shader.setFloat("pointLight.linear", programState->pointLight.linear);
+        shader.setFloat("pointLight.quadratic", programState->pointLight.quadratic);
 
         // view/projection transformations
         mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -268,7 +357,7 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, containerSpecular);
         
         glBindVertexArray(VAO);
-        for (unsigned int i = 0; i < 10; i++)
+        for (unsigned int i = 0; i < 7; i++)
         {
             // calculate the model matrix for each object and pass it to shader before drawing
             mat4 model = mat4(1.0f);
@@ -288,7 +377,7 @@ int main() {
         // we now draw as many light bulbs as we have point lights.
         glBindVertexArray(lightVAO);
         mat4 model = mat4(1.0f);
-        model = translate(model, pointLightPosition);
+        model = translate(model, programState->pointLight.position);
         model = scale(model, vec3(0.2f)); // Make it a smaller cube
         lightShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -298,34 +387,28 @@ int main() {
         modelShader.setMat4("view", view);
         modelShader.setVec3("viewPos", camera.Position);
         modelShader.setFloat("shininess", 32.0f);
-        modelShader.setVec3("dirLight.direction", dirLightDirection);
-        modelShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-        modelShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-        modelShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-        modelShader.setVec3("pointLight.position", pointLightPosition);
-        modelShader.setVec3("pointLight.ambient", 0.05f, 0.05f, 0.05f);
-        modelShader.setVec3("pointLight.diffuse", 1.0f, 1.0f, 1.0f);
-        modelShader.setVec3("pointLight.specular", 1.0f, 1.0f, 1.0f);
-        modelShader.setFloat("pointLight.constant", 1.0f);
-        modelShader.setFloat("pointLight.linear", 0.09);
-        modelShader.setFloat("pointLight.quadratic", 0.032);
+        // directional light
+        modelShader.setVec3("dirLight.direction", programState->dirLight.direction);
+        modelShader.setVec3("dirLight.ambient", programState->dirLight.ambient);
+        modelShader.setVec3("dirLight.diffuse", programState->dirLight.diffuse);
+        modelShader.setVec3("dirLight.specular", programState->dirLight.specular);
+        // point light
+        modelShader.setVec3("viewPos", camera.Position);
+        modelShader.setVec3("pointLight.position", programState->pointLight.position);
+        modelShader.setVec3("pointLight.ambient", programState->pointLight.ambient);
+        modelShader.setVec3("pointLight.diffuse", programState->pointLight.diffuse);
+        modelShader.setVec3("pointLight.specular", programState->pointLight.specular);
+        modelShader.setFloat("pointLight.constant", programState->pointLight.constant);
+        modelShader.setFloat("pointLight.linear", programState->pointLight.linear);
+        modelShader.setFloat("pointLight.quadratic", programState->pointLight.quadratic);
         model = mat4(1.0f);
-        model = translate(model, vec3(0.0f, -3.0f, -4.0f));
-        model = scale(model, vec3(1.0f, 1.0f, 1.0f));
+        model = translate(model, vec3(0.0f, -3.0f, -5.0f));
+        model = scale(model, vec3(1.0f));
         modelShader.setMat4("model", model);
         myModel.Draw(modelShader);
 
-        {
-            ImGui::Begin("Test window");
-
-            ImGui::ColorEdit3("Clear color", (float*)value_ptr(clearColor));
-
-            ImGui::End();
-        }
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
+        if(programState->imGuiEnabled)
+            DrawImGui(programState);
        
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -335,6 +418,8 @@ int main() {
         screenShader.useProgram();
         glBindVertexArray(quadVAO);
         screenShader.setInt("screenTexture", 0);
+        screenShader.setBool("shouldAA", programState->antiAliasing);
+        screenShader.setBool("shouldGrayscale", programState->grayScale);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, screenTexture); // use the now resolved color attachment as the quad's texture
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -351,6 +436,7 @@ int main() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui::DestroyContext();
 
+    programState->SaveToFile("resources/program_state.txt");
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     //shader.deleteProgram();
@@ -382,6 +468,14 @@ void fb_size_callback(GLFWwindow* window, int width, int height) {
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, 1);
+    } else if (key == GLFW_KEY_F1 && action == GLFW_PRESS) {
+        programState->imGuiEnabled = !programState->imGuiEnabled;
+        if (programState->imGuiEnabled) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+        else {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
     }
 }
 
@@ -393,7 +487,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
         firstMouse = false;
     }
 
-    camera.ProcessMouseMovement(xpos - lastX, lastY - ypos);
+    if(!programState->imGuiEnabled)camera.ProcessMouseMovement(xpos - lastX, lastY - ypos);
     lastX = xpos;
     lastY = ypos;
 }
@@ -437,4 +531,24 @@ unsigned int loadTexture(char const* path)
     }
 
     return textureID;
+}
+
+void DrawImGui(ProgramState* programState) {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    {
+        static float f = 0.0f;
+        ImGui::Begin("Rendering options");
+        ImGui::Checkbox("Anti-Aliasing MSAAx8", &programState->antiAliasing);
+        ImGui::Checkbox("Grayscale", &programState->grayScale);
+        ImGui::ColorEdit3("Background color", (float*)&programState->clearColor);
+        ImGui::DragFloat3("Point light position", (float*)value_ptr(programState->pointLight.position), 0.05, -100, 100);
+        ImGui::DragFloat3("Directional light direction", (float*)value_ptr(programState->dirLight.direction), 0.01, -1, 1);
+        ImGui::End();
+    }
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

@@ -660,6 +660,7 @@
     <None Include="resources\objects\cyborg\cyborg.blend" />
     <None Include="resources\objects\cyborg\cyborg.blend1" />
     <None Include="resources\objects\cyborg\cyborg.mtl" />
+    <None Include="resources\objects\planet\planet.mtl" />
     <None Include="resources\shaders\fragmentShader.fs.glsl" />
     <None Include="resources\shaders\lightFragmentShader.fs.glsl" />
     <None Include="resources\shaders\lightVertexShader.vs.glsl" />
@@ -673,6 +674,7 @@
     <Image Include="resources\objects\cyborg\cyborg_diffuse.png" />
     <Image Include="resources\objects\cyborg\cyborg_normal.png" />
     <Image Include="resources\objects\cyborg\cyborg_specular.png" />
+    <Image Include="resources\objects\planet\mars.png" />
     <Image Include="resources\textures\container.jpg" />
     <Image Include="resources\textures\container2.png" />
     <Image Include="resources\textures\container2_specular.png" />
@@ -688,9 +690,16 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </Object>
+    <Object Include="resources\objects\planet\planet.obj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Object>
   </ItemGroup>
   <ItemGroup>
     <Text Include="resources\objects\cyborg\LICENSE.txt" />
+    <Text Include="resources\objects\planet\source.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
