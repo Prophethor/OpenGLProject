@@ -1,4 +1,5 @@
 #version 330 core
+
 out vec4 FragColor;
 
 struct Material {
@@ -27,15 +28,13 @@ struct PointLight {
     vec3 specular;
 };
 
-#define NR_POINT_LIGHTS 4
-
 in vec3 FragPos;
 in vec3 myNormal;
 in vec2 myTexPos;
 
 uniform vec3 viewPos;
 uniform DirLight dirLight;
-uniform PointLight pointLights[NR_POINT_LIGHTS];
+uniform PointLight pointLight;
 uniform Material material;
 
 // function prototypes
@@ -48,11 +47,8 @@ void main()
     vec3 norm = normalize(myNormal);
     vec3 viewDir = normalize(viewPos - FragPos);
     
-    // phase 1: directional lighting
     vec3 result = CalcDirLight(dirLight, norm, viewDir);
-    // phase 2: point lights
-    for(int i = 0; i < NR_POINT_LIGHTS; i++)
-        result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);   
+    result += CalcPointLight(pointLight, norm, FragPos, viewDir);   
     
     FragColor = vec4(result, 1.0);
 }

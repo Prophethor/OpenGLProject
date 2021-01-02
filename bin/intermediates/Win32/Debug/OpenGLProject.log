@@ -1,19 +1,14 @@
 ﻿  Application.cpp
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(222,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(256,54): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(257,58): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(264,54): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(265,58): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(272,54): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(273,58): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(280,54): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(281,58): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(413,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(414,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(418,53): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(418,38): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(419,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(420,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(424,31): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(219,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(253,50): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(254,54): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(310,55): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(311,59): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(391,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(392,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(396,53): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(396,38): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(397,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(398,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Dev\OpenGLProject\OpenGLProject\src\Application.cpp(402,31): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
   OpenGLProject.vcxproj -> C:\Dev\OpenGLProject\bin\Win32\Debug\OpenGLProject.exe
