@@ -508,6 +508,8 @@
     <None Include="resources\objects\cyborg\cyborg.blend1" />
     <None Include="resources\objects\cyborg\cyborg.mtl" />
     <None Include="imgui.ini" />
+    <None Include="resources\shaders\screenVertexShader.vs.glsl" />
+    <None Include="resources\shaders\screenFragmentShader.fs.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\textures\container.jpg" />

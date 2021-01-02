@@ -38,7 +38,6 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_SAMPLES, 8);
 
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "OpenGLProject", NULL, NULL);
     if (window == NULL) {
@@ -59,12 +58,12 @@ int main() {
     }
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_MULTISAMPLE);
 
     Shader shader("resources/shaders/vertexShader.vs.glsl", "resources/shaders/fragmentShader.fs.glsl");
     Shader lightShader("resources/shaders/lightVertexShader.vs.glsl", "resources/shaders/lightFragmentShader.fs.glsl");
     Shader modelShader("resources/shaders/modelVertexShader.vs.glsl", "resources/shaders/modelFragmentShader.fs.glsl");
-    
+    Shader screenShader("resources/shaders/screenVertexShader.vs.glsl", "resources/shaders/screenFragmentShader.fs.glsl");
+
     Model myModel("resources/objects/cyborg/cyborg.obj");
 
     float vertices[] = {
@@ -131,6 +130,17 @@ int main() {
         vec3(0.0f, 0.0f, -3.0f)
     };
 
+    float quadVertices[] = {   // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
+
     unsigned int VBO, VAO, lightVAO;
 
     glGenBuffers(1, &VBO);
@@ -153,8 +163,42 @@ int main() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Load and create texture
+    unsigned int quadVAO, quadVBO;
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
+    // configure MSAA framebuffer
+    // --------------------------
+    unsigned int framebuffer;
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    // create a multisampled color attachment texture
+    unsigned int screenTexture;
+    glGenTextures(1, &screenTexture);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, screenTexture);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, SCR_WIDTH, SCR_HEIGHT, GL_TRUE);
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, screenTexture, 0);
+    // create a (also multisampled) renderbuffer object for depth and stencil attachments
+    unsigned int rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    
     unsigned int containerDiffuse = loadTexture("resources/textures/container2.png");
     unsigned int containerSpecular = loadTexture("resources/textures/container2_specular.png");
     
@@ -187,6 +231,12 @@ int main() {
 
         glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+
 
         shader.useProgram();
         shader.setVec3("viewPos", camera.Position);
@@ -229,44 +279,6 @@ int main() {
         shader.setFloat("pointLights[3].constant", 1.0f);
         shader.setFloat("pointLights[3].linear", 0.09);
         shader.setFloat("pointLights[3].quadratic", 0.032);
-
-        // directional light
-        modelShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-        modelShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-        modelShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-        modelShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-        // point light 1
-        modelShader.setVec3("pointLights[0].position", pointLightPositions[0]);
-        modelShader.setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
-        modelShader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
-        modelShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-        modelShader.setFloat("pointLights[0].constant", 1.0f);
-        modelShader.setFloat("pointLights[0].linear", 0.09);
-        modelShader.setFloat("pointLights[0].quadratic", 0.032);
-        // point light 2
-        modelShader.setVec3("pointLights[1].position", pointLightPositions[1]);
-        modelShader.setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
-        modelShader.setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
-        modelShader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-        modelShader.setFloat("pointLights[1].constant", 1.0f);
-        modelShader.setFloat("pointLights[1].linear", 0.09);
-        modelShader.setFloat("pointLights[1].quadratic", 0.032);
-        // point light 3
-        modelShader.setVec3("pointLights[2].position", pointLightPositions[2]);
-        modelShader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
-        modelShader.setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
-        modelShader.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
-        modelShader.setFloat("pointLights[2].constant", 1.0f);
-        modelShader.setFloat("pointLights[2].linear", 0.09);
-        modelShader.setFloat("pointLights[2].quadratic", 0.032);
-        // point light 4
-        modelShader.setVec3("pointLights[3].position", pointLightPositions[3]);
-        modelShader.setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
-        modelShader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
-        modelShader.setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
-        modelShader.setFloat("pointLights[3].constant", 1.0f);
-        modelShader.setFloat("pointLights[3].linear", 0.09);
-        modelShader.setFloat("pointLights[3].quadratic", 0.032);
 
         // view/projection transformations
         mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -335,6 +347,19 @@ int main() {
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+       
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+
+        screenShader.useProgram();
+        glBindVertexArray(quadVAO);
+        screenShader.setInt("screenTexture", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, screenTexture); // use the now resolved color attachment as the quad's texture
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         //check events, swap buffers
 
