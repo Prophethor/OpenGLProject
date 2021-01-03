@@ -511,6 +511,8 @@
     <None Include="resources\shaders\screenVertexShader.vs.glsl" />
     <None Include="resources\shaders\screenFragmentShader.fs.glsl" />
     <None Include="resources\objects\planet\planet.mtl" />
+    <None Include="resources\shaders\planeVertexShader.vs.glsl" />
+    <None Include="resources\shaders\planeFragmentShader.fs.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\textures\container.jpg" />

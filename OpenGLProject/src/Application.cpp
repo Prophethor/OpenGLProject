@@ -62,10 +62,11 @@ struct PointLight {
 };
 
 struct ProgramState {
-    glm::vec3 clearColor = glm::vec3(0);
     bool antiAliasing = false;
     bool grayScale = false;
     bool imGuiEnabled = false;
+    vec3 planeColor = vec3(0);
+    vec3 clearColor = vec3(0);
     DirLight dirLight;
     PointLight pointLight;
     ProgramState()
@@ -81,12 +82,15 @@ struct ProgramState {
 
 void ProgramState::SaveToFile(std::string filename) {
     std::ofstream out(filename);
-    out << clearColor.r << '\n'
-        << clearColor.g << '\n'
-        << clearColor.b << '\n'
-        << antiAliasing << '\n'
+    out << antiAliasing << '\n'
         << grayScale << '\n'
         << imGuiEnabled << '\n'
+        << planeColor.r << '\n'
+        << planeColor.g << '\n'
+        << planeColor.b << '\n'
+        << clearColor.r << '\n'
+        << clearColor.g << '\n'
+        << clearColor.b << '\n'
         << dirLight.direction.x << '\n'
         << dirLight.direction.y << '\n'
         << dirLight.direction.z << '\n'
@@ -98,12 +102,15 @@ void ProgramState::SaveToFile(std::string filename) {
 void ProgramState::LoadFromFile(std::string filename) {
     std::ifstream in(filename);
     if (in) {
-        in >> clearColor.r
-            >> clearColor.g
-            >> clearColor.b
-            >> antiAliasing
+        in  >> antiAliasing
             >> grayScale
             >> imGuiEnabled
+            >> planeColor.r
+            >> planeColor.g
+            >> planeColor.b
+            >> clearColor.r
+            >> clearColor.g
+            >> clearColor.b
             >> dirLight.direction.x
             >> dirLight.direction.y
             >> dirLight.direction.z
@@ -166,14 +173,24 @@ int main() {
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
 
-    Shader shader("resources/shaders/vertexShader.vs.glsl", "resources/shaders/fragmentShader.fs.glsl");
+    Shader cubeShader("resources/shaders/vertexShader.vs.glsl", "resources/shaders/fragmentShader.fs.glsl");
     Shader lightShader("resources/shaders/lightVertexShader.vs.glsl", "resources/shaders/lightFragmentShader.fs.glsl");
     Shader modelShader("resources/shaders/modelVertexShader.vs.glsl", "resources/shaders/modelFragmentShader.fs.glsl");
     Shader screenShader("resources/shaders/screenVertexShader.vs.glsl", "resources/shaders/screenFragmentShader.fs.glsl");
+    Shader planeShader("resources/shaders/planeVertexShader.vs.glsl", "resources/shaders/planeFragmentShader.fs.glsl");
 
     Model myModel("resources/objects/cyborg/cyborg.obj");
 
-    float vertices[] = {
+    float planeVertices[] = {
+        -0.5f, 0.0f, -0.5f,
+         0.5f, 0.0f, -0.5f,
+         0.5f, 0.0f,  0.5f,
+         0.5f, 0.0f,  0.5f,
+        -0.5f, 0.0f,  0.5f,
+        -0.5f, 0.0f, -0.5f
+    };
+
+    float cubeVertices[] = {
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
          0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
          0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
@@ -218,7 +235,6 @@ int main() {
     };
 
     vec3 cubePositions[] = {
-        vec3(0.0f, 0.0f, 0.0f),
         vec3(-1.5f, -2.2f, -2.5f),
         vec3(2.4f, -0.4f, -3.5f),
         vec3(1.3f, -2.0f, -2.5f),
@@ -230,8 +246,8 @@ int main() {
 
     
 
-    float quadVertices[] = {   // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-        // positions   // texCoords
+    float quadVertices[] = {
+
         -1.0f,  1.0f,  0.0f, 1.0f,
         -1.0f, -1.0f,  0.0f, 0.0f,
          1.0f, -1.0f,  1.0f, 0.0f,
@@ -241,16 +257,15 @@ int main() {
          1.0f,  1.0f,  1.0f, 1.0f
     };
 
-    unsigned int VBO, VAO, lightVAO;
+    unsigned int cubeVBO, cubeVAO, lightVAO, planeVBO, planeVAO, quadVAO, quadVBO;
 
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glGenBuffers(1, &cubeVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
 
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-    
-    GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0););
+    glGenVertexArrays(1, &cubeVAO);
+    glBindVertexArray(cubeVAO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
@@ -259,16 +274,24 @@ int main() {
 
     glGenVertexArrays(1, &lightVAO);
     glBindVertexArray(lightVAO);
-
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    unsigned int quadVAO, quadVBO;
-    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &planeVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
+
+    glGenVertexArrays(1, &planeVAO);
+    glBindVertexArray(planeVAO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
     glGenBuffers(1, &quadVBO);
-    glBindVertexArray(quadVAO);
     glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+
+    glGenVertexArrays(1, &quadVAO);
+    glBindVertexArray(quadVAO);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
@@ -302,13 +325,7 @@ int main() {
     unsigned int containerDiffuse = loadTexture("resources/textures/container2.png");
     unsigned int containerSpecular = loadTexture("resources/textures/container2_specular.png");
     
-    shader.useProgram();
-    shader.setInt("material.diffuse", 0);
-    shader.setInt("material.specular", 1);
-    
     //Execute this loop until window should close
-
-    vec3 clearColor = vec3(0.1f, 0.1f, 0.1f);
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -324,47 +341,44 @@ int main() {
         glEnable(GL_DEPTH_TEST);
 
 
-        shader.useProgram();
-        shader.setFloat("material.shininess", 32.0f);
-
+        cubeShader.useProgram();
+        cubeShader.setFloat("material.shininess", 32.0f);
+        cubeShader.setInt("material.diffuse", 0);
+        cubeShader.setInt("material.specular", 1);
         // directional light
-        shader.setVec3("dirLight.direction", programState->dirLight.direction);
-        shader.setVec3("dirLight.ambient", programState->dirLight.ambient);
-        shader.setVec3("dirLight.diffuse", programState->dirLight.diffuse);
-        shader.setVec3("dirLight.specular", programState->dirLight.specular);
+        cubeShader.setVec3("dirLight.direction", programState->dirLight.direction);
+        cubeShader.setVec3("dirLight.ambient", programState->dirLight.ambient);
+        cubeShader.setVec3("dirLight.diffuse", programState->dirLight.diffuse);
+        cubeShader.setVec3("dirLight.specular", programState->dirLight.specular);
         // point light
-        shader.setVec3("viewPos", camera.Position);
-        shader.setVec3("pointLight.position", programState->pointLight.position);
-        shader.setVec3("pointLight.ambient", programState->pointLight.ambient);
-        shader.setVec3("pointLight.diffuse", programState->pointLight.diffuse);
-        shader.setVec3("pointLight.specular", programState->pointLight.specular);
-        shader.setFloat("pointLight.constant", programState->pointLight.constant);
-        shader.setFloat("pointLight.linear", programState->pointLight.linear);
-        shader.setFloat("pointLight.quadratic", programState->pointLight.quadratic);
+        cubeShader.setVec3("viewPos", camera.Position);
+        cubeShader.setVec3("pointLight.position", programState->pointLight.position);
+        cubeShader.setVec3("pointLight.ambient", programState->pointLight.ambient);
+        cubeShader.setVec3("pointLight.diffuse", programState->pointLight.diffuse);
+        cubeShader.setVec3("pointLight.specular", programState->pointLight.specular);
+        cubeShader.setFloat("pointLight.constant", programState->pointLight.constant);
+        cubeShader.setFloat("pointLight.linear", programState->pointLight.linear);
+        cubeShader.setFloat("pointLight.quadratic", programState->pointLight.quadratic);
 
         // view/projection transformations
         mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         mat4 view = camera.GetViewMatrix();
-        shader.setMat4("projection", projection);
-        shader.setMat4("view", view);
+        cubeShader.setMat4("projection", projection);
+        cubeShader.setMat4("view", view);
         
-        // bind diffuse map
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, containerDiffuse);
-        
-        // bind specular map
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, containerSpecular);
         
-        glBindVertexArray(VAO);
-        for (unsigned int i = 0; i < 7; i++)
+        glBindVertexArray(cubeVAO);
+        for (unsigned int i = 0; i < 6; i++)
         {
-            // calculate the model matrix for each object and pass it to shader before drawing
             mat4 model = mat4(1.0f);
             model = translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
+            float angle = 20.0f * (i+1);
             model = rotate(model, radians(angle), vec3(1.0f, 0.3f, 0.5f));
-            shader.setMat4("model", model);
+            cubeShader.setMat4("model", model);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
@@ -373,13 +387,11 @@ int main() {
         lightShader.useProgram();
         lightShader.setMat4("projection", projection);
         lightShader.setMat4("view", view);
-
-        // we now draw as many light bulbs as we have point lights.
-        glBindVertexArray(lightVAO);
         mat4 model = mat4(1.0f);
         model = translate(model, programState->pointLight.position);
         model = scale(model, vec3(0.2f)); // Make it a smaller cube
         lightShader.setMat4("model", model);
+        glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         modelShader.useProgram();
@@ -405,7 +417,33 @@ int main() {
         model = translate(model, vec3(0.0f, -3.0f, -5.0f));
         model = scale(model, vec3(1.0f));
         modelShader.setMat4("model", model);
+
         myModel.Draw(modelShader);
+
+        planeShader.useProgram();
+        model = mat4(1.0f);
+        model = translate(model, vec3(0.0f, -3.0f, 0.0f));
+        model = scale(model, vec3(200.0f));
+        planeShader.setMat4("model", model);
+        planeShader.setMat4("view", view);
+        planeShader.setMat4("projection", projection);
+        planeShader.setVec3("myColor", programState->planeColor);
+        planeShader.setFloat("shininess", 32.0f);
+        planeShader.setVec3("viewPos", camera.Position);
+        planeShader.setVec3("dirLight.direction", programState->dirLight.direction);
+        planeShader.setVec3("dirLight.ambient", programState->dirLight.ambient);
+        planeShader.setVec3("dirLight.diffuse", programState->dirLight.diffuse);
+        planeShader.setVec3("dirLight.specular", programState->dirLight.specular);
+        planeShader.setVec3("pointLight.position", programState->pointLight.position);
+        planeShader.setVec3("pointLight.ambient", programState->pointLight.ambient);
+        planeShader.setVec3("pointLight.diffuse", programState->pointLight.diffuse);
+        planeShader.setVec3("pointLight.specular", programState->pointLight.specular);
+        planeShader.setFloat("pointLight.constant", programState->pointLight.constant);
+        planeShader.setFloat("pointLight.linear", programState->pointLight.linear);
+        planeShader.setFloat("pointLight.quadratic", programState->pointLight.quadratic);
+        glBindVertexArray(planeVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
 
         if(programState->imGuiEnabled)
             DrawImGui(programState);
@@ -437,9 +475,17 @@ int main() {
     ImGui::DestroyContext();
 
     programState->SaveToFile("resources/program_state.txt");
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    //shader.deleteProgram();
+    glDeleteVertexArrays(1, &cubeVAO);
+    glDeleteVertexArrays(1, &lightVAO);
+    glDeleteVertexArrays(1, &planeVAO);
+    glDeleteVertexArrays(1, &quadVAO);
+    glDeleteBuffers(1, &cubeVBO);
+    glDeleteBuffers(1, &planeVBO);
+    glDeleteBuffers(1, &quadVBO);
+    cubeShader.deleteProgram();
+    lightShader.deleteProgram();
+    planeShader.deleteProgram();
+    screenShader.deleteProgram();
     glfwTerminate();
     return EXIT_SUCCESS;
 }
@@ -544,6 +590,7 @@ void DrawImGui(ProgramState* programState) {
         ImGui::Checkbox("Anti-Aliasing MSAAx8", &programState->antiAliasing);
         ImGui::Checkbox("Grayscale", &programState->grayScale);
         ImGui::ColorEdit3("Background color", (float*)&programState->clearColor);
+        ImGui::ColorEdit3("Ground color", (float*)&programState->planeColor);
         ImGui::DragFloat3("Point light position", (float*)value_ptr(programState->pointLight.position), 0.05, -100, 100);
         ImGui::DragFloat3("Directional light direction", (float*)value_ptr(programState->dirLight.direction), 0.01, -1, 1);
         ImGui::End();

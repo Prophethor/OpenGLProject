@@ -1,7 +1,7 @@
 #version 330 core
 out vec4 FragColor;
 
-in vec2 TexCoords;
+in vec2 myTexPos;
 
 uniform sampler2DMS screenTexture;
 uniform bool shouldAA;
@@ -12,7 +12,7 @@ void main()
     vec3 col;
     if(shouldAA){
         ivec2 viewPortDim = ivec2(800,600);
-        ivec2 coords = ivec2(viewPortDim * TexCoords);
+        ivec2 coords = ivec2(viewPortDim * myTexPos);
         vec3 sample0 = texelFetch(screenTexture,coords,0).rgb;
         vec3 sample1 = texelFetch(screenTexture,coords,1).rgb;
         vec3 sample2 = texelFetch(screenTexture,coords,2).rgb;
@@ -24,7 +24,7 @@ void main()
         col = 0.125 * (sample0 + sample1 + sample2 + sample3 + sample4 + sample5 + sample6 + sample7);
     } else {
         ivec2 viewPortDim = ivec2(800,600);
-        ivec2 coords = ivec2(viewPortDim * TexCoords);
+        ivec2 coords = ivec2(viewPortDim * myTexPos);
         vec3 sample0 = texelFetch(screenTexture,coords,0).rgb;
         col = sample0;
     }
