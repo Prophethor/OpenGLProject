@@ -21,8 +21,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void update(GLFWwindow* window);
 unsigned int loadTexture(const char* path);
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1024;
+const unsigned int SCR_HEIGHT = 720;
 
 struct DirLight {
     vec3 direction;
@@ -67,6 +67,7 @@ struct ProgramState {
     bool imGuiEnabled = false;
     vec3 planeColor = vec3(0);
     vec3 clearColor = vec3(0);
+    vec3 lightColor = vec3(0);
     DirLight dirLight;
     PointLight pointLight;
     ProgramState()
@@ -91,6 +92,9 @@ void ProgramState::SaveToFile(std::string filename) {
         << clearColor.r << '\n'
         << clearColor.g << '\n'
         << clearColor.b << '\n'
+        << lightColor.r << '\n'
+        << lightColor.g << '\n'
+        << lightColor.b << '\n'
         << dirLight.direction.x << '\n'
         << dirLight.direction.y << '\n'
         << dirLight.direction.z << '\n'
@@ -111,6 +115,9 @@ void ProgramState::LoadFromFile(std::string filename) {
             >> clearColor.r
             >> clearColor.g
             >> clearColor.b
+            >> lightColor.r
+            >> lightColor.g
+            >> lightColor.b
             >> dirLight.direction.x
             >> dirLight.direction.y
             >> dirLight.direction.z
@@ -173,7 +180,7 @@ int main() {
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
 
-    Shader cubeShader("resources/shaders/vertexShader.vs.glsl", "resources/shaders/fragmentShader.fs.glsl");
+    Shader cubeShader("resources/shaders/cubeVertexShader.vs.glsl", "resources/shaders/cubeFragmentShader.fs.glsl");
     Shader lightShader("resources/shaders/lightVertexShader.vs.glsl", "resources/shaders/lightFragmentShader.fs.glsl");
     Shader modelShader("resources/shaders/modelVertexShader.vs.glsl", "resources/shaders/modelFragmentShader.fs.glsl");
     Shader screenShader("resources/shaders/screenVertexShader.vs.glsl", "resources/shaders/screenFragmentShader.fs.glsl");
@@ -329,6 +336,9 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
 
+        GLint viewPortDim[4];
+        glGetIntegerv(GL_VIEWPORT, viewPortDim);
+
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -359,6 +369,7 @@ int main() {
         cubeShader.setFloat("pointLight.constant", programState->pointLight.constant);
         cubeShader.setFloat("pointLight.linear", programState->pointLight.linear);
         cubeShader.setFloat("pointLight.quadratic", programState->pointLight.quadratic);
+        cubeShader.setVec3("lightColor", programState->lightColor);
 
         // view/projection transformations
         mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -391,6 +402,7 @@ int main() {
         model = translate(model, programState->pointLight.position);
         model = scale(model, vec3(0.2f)); // Make it a smaller cube
         lightShader.setMat4("model", model);
+        lightShader.setVec3("lightColor", programState->lightColor);
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -413,6 +425,7 @@ int main() {
         modelShader.setFloat("pointLight.constant", programState->pointLight.constant);
         modelShader.setFloat("pointLight.linear", programState->pointLight.linear);
         modelShader.setFloat("pointLight.quadratic", programState->pointLight.quadratic);
+        modelShader.setVec3("lightColor", programState->lightColor);
         model = mat4(1.0f);
         model = translate(model, vec3(0.0f, -3.0f, -5.0f));
         model = scale(model, vec3(1.0f));
@@ -441,6 +454,7 @@ int main() {
         planeShader.setFloat("pointLight.constant", programState->pointLight.constant);
         planeShader.setFloat("pointLight.linear", programState->pointLight.linear);
         planeShader.setFloat("pointLight.quadratic", programState->pointLight.quadratic);
+        planeShader.setVec3("lightColor", programState->lightColor);
         glBindVertexArray(planeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -458,6 +472,7 @@ int main() {
         screenShader.setInt("screenTexture", 0);
         screenShader.setBool("shouldAA", programState->antiAliasing);
         screenShader.setBool("shouldGrayscale", programState->grayScale);
+        glUniform2iv(glGetUniformLocation(screenShader.GetID(),"viewPortDim"), 1, &viewPortDim[2]);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, screenTexture); // use the now resolved color attachment as the quad's texture
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -591,6 +606,7 @@ void DrawImGui(ProgramState* programState) {
         ImGui::Checkbox("Grayscale", &programState->grayScale);
         ImGui::ColorEdit3("Background color", (float*)&programState->clearColor);
         ImGui::ColorEdit3("Ground color", (float*)&programState->planeColor);
+        ImGui::ColorEdit3("Light color", (float*)&programState->lightColor);
         ImGui::DragFloat3("Point light position", (float*)value_ptr(programState->pointLight.position), 0.05, -100, 100);
         ImGui::DragFloat3("Directional light direction", (float*)value_ptr(programState->dirLight.direction), 0.01, -1, 1);
         ImGui::End();

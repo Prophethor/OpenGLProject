@@ -661,7 +661,7 @@
     <None Include="resources\objects\cyborg\cyborg.blend1" />
     <None Include="resources\objects\cyborg\cyborg.mtl" />
     <None Include="resources\objects\planet\planet.mtl" />
-    <None Include="resources\shaders\fragmentShader.fs.glsl" />
+    <None Include="resources\shaders\cubeFragmentShader.fs.glsl" />
     <None Include="resources\shaders\lightFragmentShader.fs.glsl" />
     <None Include="resources\shaders\lightVertexShader.vs.glsl" />
     <None Include="resources\shaders\modelFragmentShader.fs.glsl" />
@@ -670,7 +670,7 @@
     <None Include="resources\shaders\planeVertexShader.vs.glsl" />
     <None Include="resources\shaders\screenFragmentShader.fs.glsl" />
     <None Include="resources\shaders\screenVertexShader.vs.glsl" />
-    <None Include="resources\shaders\vertexShader.vs.glsl" />
+    <None Include="resources\shaders\cubeVertexShader.vs.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\objects\cyborg\cyborg_diffuse.png" />

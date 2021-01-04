@@ -35,6 +35,7 @@ in vec2 myTexPos;
 uniform vec3 viewPos;
 uniform DirLight dirLight;
 uniform PointLight pointLight;
+uniform vec3 lightColor;
 uniform Material material;
 
 // function prototypes
@@ -66,7 +67,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     vec3 ambient = light.ambient * vec3(texture(material.diffuse, myTexPos));
     vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, myTexPos));
     vec3 specular = light.specular * spec * vec3(texture(material.specular, myTexPos));
-    return (ambient + diffuse + specular);
+    return (ambient + diffuse + specular)*lightColor;
 }
 
 // calculates the color when using a point light.
@@ -88,5 +89,5 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
-    return (ambient + diffuse + specular);
+    return (ambient + diffuse*lightColor + specular*lightColor);
 }
