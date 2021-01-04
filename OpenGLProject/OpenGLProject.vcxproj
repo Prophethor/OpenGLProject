@@ -160,16 +160,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="include\glm\detail\glm.cpp" />
-    <ClCompile Include="include\imgui\imgui.cpp" />
-    <ClCompile Include="include\imgui\imgui_demo.cpp" />
-    <ClCompile Include="include\imgui\imgui_draw.cpp" />
-    <ClCompile Include="include\imgui\imgui_impl_glfw.cpp" />
-    <ClCompile Include="include\imgui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="include\imgui\imgui_tables.cpp" />
-    <ClCompile Include="include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\Application.cpp" />
-    <ClCompile Include="include\GLAD\glad.c" />
-    <ClCompile Include="src\std_image.cpp" />
+    <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\Mesh.cpp" />
+    <ClCompile Include="src\Model.cpp" />
+    <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\vendor\glad.c" />
+    <ClCompile Include="src\vendor\imgui\imgui.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_demo.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_tables.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\vendor\std_image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\assimp\ai_assert.h" />
@@ -503,8 +507,8 @@
     <ClInclude Include="include\imgui\imstb_rectpack.h" />
     <ClInclude Include="include\imgui\imstb_textedit.h" />
     <ClInclude Include="include\imgui\imstb_truetype.h" />
+    <ClInclude Include="include\lib\Application.h" />
     <ClInclude Include="include\lib\Camera.h" />
-    <ClInclude Include="include\lib\Error.h" />
     <ClInclude Include="include\lib\Mesh.h" />
     <ClInclude Include="include\lib\Model.h" />
     <ClInclude Include="include\lib\Shader.h" />
@@ -512,7 +516,7 @@
     <ClInclude Include="include\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="imgui.ini" />
+    <None Include="src\vendor\imgui\imgui.ini" />
     <None Include="include\assimp\.editorconfig" />
     <None Include="include\assimp\color4.inl" />
     <None Include="include\assimp\material.inl" />
@@ -677,7 +681,6 @@
     <Image Include="resources\objects\cyborg\cyborg_normal.png" />
     <Image Include="resources\objects\cyborg\cyborg_specular.png" />
     <Image Include="resources\objects\planet\mars.png" />
-    <Image Include="resources\textures\container.jpg" />
     <Image Include="resources\textures\container2.png" />
     <Image Include="resources\textures\container2_specular.png" />
   </ItemGroup>
@@ -702,6 +705,7 @@
   <ItemGroup>
     <Text Include="resources\objects\cyborg\LICENSE.txt" />
     <Text Include="resources\objects\planet\source.txt" />
+    <Text Include="resources\program_state.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

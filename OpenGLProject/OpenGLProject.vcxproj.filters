@@ -2,16 +2,20 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="src\Application.cpp" />
-    <ClCompile Include="include\GLAD\glad.c" />
     <ClCompile Include="include\glm\detail\glm.cpp" />
-    <ClCompile Include="src\std_image.cpp" />
-    <ClCompile Include="include\imgui\imgui.cpp" />
-    <ClCompile Include="include\imgui\imgui_demo.cpp" />
-    <ClCompile Include="include\imgui\imgui_draw.cpp" />
-    <ClCompile Include="include\imgui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="include\imgui\imgui_tables.cpp" />
-    <ClCompile Include="include\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="include\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_demo.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_tables.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\vendor\std_image.cpp" />
+    <ClCompile Include="src\vendor\glad.c" />
+    <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\Model.cpp" />
+    <ClCompile Include="src\Mesh.cpp" />
+    <ClCompile Include="src\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\lib\Shader.h" />
@@ -342,7 +346,6 @@
     <ClInclude Include="include\assimp\version.h" />
     <ClInclude Include="include\lib\Model.h" />
     <ClInclude Include="include\lib\Mesh.h" />
-    <ClInclude Include="include\lib\Error.h" />
     <ClInclude Include="include\stb_image.h" />
     <ClInclude Include="include\imgui\imconfig.h" />
     <ClInclude Include="include\imgui\imgui.h" />
@@ -352,6 +355,7 @@
     <ClInclude Include="include\imgui\imstb_textedit.h" />
     <ClInclude Include="include\imgui\imstb_truetype.h" />
     <ClInclude Include="include\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="include\lib\Application.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="include\glm\detail\func_common.inl" />
@@ -505,7 +509,6 @@
     <None Include="resources\objects\cyborg\cyborg.blend" />
     <None Include="resources\objects\cyborg\cyborg.blend1" />
     <None Include="resources\objects\cyborg\cyborg.mtl" />
-    <None Include="imgui.ini" />
     <None Include="resources\shaders\screenVertexShader.vs.glsl" />
     <None Include="resources\shaders\screenFragmentShader.fs.glsl" />
     <None Include="resources\objects\planet\planet.mtl" />
@@ -513,9 +516,9 @@
     <None Include="resources\shaders\planeFragmentShader.fs.glsl" />
     <None Include="resources\shaders\cubeVertexShader.vs.glsl" />
     <None Include="resources\shaders\cubeFragmentShader.fs.glsl" />
+    <None Include="src\vendor\imgui\imgui.ini" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="resources\textures\container.jpg" />
     <Image Include="resources\textures\container2.png" />
     <Image Include="resources\textures\container2_specular.png" />
     <Image Include="resources\objects\cyborg\cyborg_diffuse.png" />
@@ -534,5 +537,6 @@
   <ItemGroup>
     <Text Include="resources\objects\cyborg\LICENSE.txt" />
     <Text Include="resources\objects\planet\source.txt" />
+    <Text Include="resources\program_state.txt" />
   </ItemGroup>
 </Project>

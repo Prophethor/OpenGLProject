@@ -1,150 +1,18 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <stb_image.h>
-#include <imgui/imgui.h>
-#include <imgui/imgui_impl_opengl3.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <lib/Shader.h>
-#include <lib/Camera.h>
-#include <lib/Model.h>
-#include <lib/Error.h>
-#include <iostream>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-void fb_size_callback(GLFWwindow* window, int width, int height);
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void update(GLFWwindow* window);
-unsigned int loadTexture(const char* path);
-
-const unsigned int SCR_WIDTH = 1024;
-const unsigned int SCR_HEIGHT = 720;
-
-struct DirLight {
-    vec3 direction;
-
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-
-    DirLight(vec3 dir) {
-        direction = dir;
-        ambient = vec3(0.1, 0.1, 0.1);
-        diffuse = vec3(0.6, 0.6, 0.6);
-        specular = vec3(1.0, 1.0, 1.0);
-    }             
-};
-
-struct PointLight {
-
-    vec3 position;
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-
-    float constant;
-    float linear;
-    float quadratic;
-
-    PointLight(vec3 pos) {
-        position = pos;
-        ambient = vec3(0.1, 0.1, 0.1);
-        diffuse = vec3(0.6, 0.6, 0.6);
-        specular = vec3(1.0, 1.0, 1.0);
-        constant = 1.0f;
-        linear = 0.09f;
-        quadratic = 0.032f;
-    }
-};
-
-struct ProgramState {
-    bool antiAliasing = false;
-    bool grayScale = false;
-    bool imGuiEnabled = false;
-    vec3 planeColor = vec3(0);
-    vec3 clearColor = vec3(0);
-    vec3 lightColor = vec3(0);
-    DirLight dirLight;
-    PointLight pointLight;
-    ProgramState()
-        :
-        dirLight(vec3(0.0f,0.0f,0.0f)),
-        pointLight(vec3(0.0f,0.0f,-3.0f))
-    {}
-
-    void SaveToFile(std::string filename);
-
-    void LoadFromFile(std::string filename);
-};
-
-void ProgramState::SaveToFile(std::string filename) {
-    std::ofstream out(filename);
-    out << antiAliasing << '\n'
-        << grayScale << '\n'
-        << imGuiEnabled << '\n'
-        << planeColor.r << '\n'
-        << planeColor.g << '\n'
-        << planeColor.b << '\n'
-        << clearColor.r << '\n'
-        << clearColor.g << '\n'
-        << clearColor.b << '\n'
-        << lightColor.r << '\n'
-        << lightColor.g << '\n'
-        << lightColor.b << '\n'
-        << dirLight.direction.x << '\n'
-        << dirLight.direction.y << '\n'
-        << dirLight.direction.z << '\n'
-        << pointLight.position.x << '\n'
-        << pointLight.position.y << '\n'
-        << pointLight.position.z << '\n';
-}
-
-void ProgramState::LoadFromFile(std::string filename) {
-    std::ifstream in(filename);
-    if (in) {
-        in  >> antiAliasing
-            >> grayScale
-            >> imGuiEnabled
-            >> planeColor.r
-            >> planeColor.g
-            >> planeColor.b
-            >> clearColor.r
-            >> clearColor.g
-            >> clearColor.b
-            >> lightColor.r
-            >> lightColor.g
-            >> lightColor.b
-            >> dirLight.direction.x
-            >> dirLight.direction.y
-            >> dirLight.direction.z
-            >> pointLight.position.x
-            >> pointLight.position.y
-            >> pointLight.position.z;
-    }
-}
+#include <lib/Application.h>
 
 ProgramState* programState;
-
-Camera camera(vec3(0.0f,0.0f,3.0f));
-float lastX = SCR_WIDTH / 2.0f;
-float lastY = SCR_HEIGHT / 2.0f;
-bool firstMouse = true;
-
-float deltaTime = 0.0f; // Time between current frame and last frame
-float lastFrame = 0.0f; // Time of last frame
-
-void DrawImGui(ProgramState* programState);
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
 int main() {
+
+    //Initialize GLFW
 
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    //Generate window and context
 
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "OpenGLProject", NULL, NULL);
     if (window == NULL) {
@@ -153,24 +21,34 @@ int main() {
         return EXIT_FAILURE;
     }
     glfwMakeContextCurrent(window);
+
+    //Tell GL which functions to call when certain events happen
+
     glfwSetFramebufferSizeCallback(window, fb_size_callback);
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    //Initialize GLAD
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return EXIT_FAILURE;
     }
 
-    glEnable(GL_DEPTH_TEST);
+    //Initialize new program state and if there is a file containing previous one read from it
 
     programState = new ProgramState;
     programState->LoadFromFile("resources/program_state.txt");
+
+    //Hide/show cursor depending on if console mode is active 
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     if (programState->imGuiEnabled) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
+
+    //Initialize ImGui
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -180,91 +58,23 @@ int main() {
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
 
+    //Initialize all of our shader programs
+
     Shader cubeShader("resources/shaders/cubeVertexShader.vs.glsl", "resources/shaders/cubeFragmentShader.fs.glsl");
     Shader lightShader("resources/shaders/lightVertexShader.vs.glsl", "resources/shaders/lightFragmentShader.fs.glsl");
     Shader modelShader("resources/shaders/modelVertexShader.vs.glsl", "resources/shaders/modelFragmentShader.fs.glsl");
     Shader screenShader("resources/shaders/screenVertexShader.vs.glsl", "resources/shaders/screenFragmentShader.fs.glsl");
     Shader planeShader("resources/shaders/planeVertexShader.vs.glsl", "resources/shaders/planeFragmentShader.fs.glsl");
 
+    //Load a model from given location
+
     Model myModel("resources/objects/cyborg/cyborg.obj");
 
-    float planeVertices[] = {
-        -0.5f, 0.0f, -0.5f,
-         0.5f, 0.0f, -0.5f,
-         0.5f, 0.0f,  0.5f,
-         0.5f, 0.0f,  0.5f,
-        -0.5f, 0.0f,  0.5f,
-        -0.5f, 0.0f, -0.5f
-    };
+    //Declare all needed VBOs and VAOs
 
-    float cubeVertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+    unsigned int cubeVBO, cubeVAO, lightVAO, planeVBO, planeVAO, quadVBO, quadVAO;
 
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
-    };
-
-    vec3 cubePositions[] = {
-        vec3(-1.5f, -2.2f, -2.5f),
-        vec3(2.4f, -0.4f, -3.5f),
-        vec3(1.3f, -2.0f, -2.5f),
-        vec3(1.5f, 2.0f, -2.5f),
-        vec3(1.5f, 0.2f, -1.5f),
-        vec3(-1.3f, 1.0f, -1.5f)
-    };
-
-
-    
-
-    float quadVertices[] = {
-
-        -1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
-    };
-
-    unsigned int cubeVBO, cubeVAO, lightVAO, planeVBO, planeVAO, quadVAO, quadVBO;
+    //Generate data needed to draw a cube
 
     glGenBuffers(1, &cubeVBO);
     glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
@@ -279,10 +89,14 @@ int main() {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
+    //Generate data needed to draw a light source cube
+
     glGenVertexArrays(1, &lightVAO);
     glBindVertexArray(lightVAO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    //Generate data needed to draw a ground plane
 
     glGenBuffers(1, &planeVBO);
     glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
@@ -292,6 +106,8 @@ int main() {
     glBindVertexArray(planeVAO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    //Generate data needed to draw a screen texture for a custom framebuffer
 
     glGenBuffers(1, &quadVBO);
     glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
@@ -304,19 +120,23 @@ int main() {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-    // configure MSAA framebuffer
-    // --------------------------
+    //Configure post-processing framebuffer
+
     unsigned int framebuffer;
     glGenFramebuffers(1, &framebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    // create a multisampled color attachment texture
+
+    //Create a multisampled color attachment texture
+
     unsigned int screenTexture;
     glGenTextures(1, &screenTexture);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, screenTexture);
     glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGB, SCR_WIDTH, SCR_HEIGHT, GL_TRUE);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, screenTexture, 0);
-    // create a (also multisampled) renderbuffer object for depth and stencil attachments
+
+    //Create a (also multisampled) renderbuffer object for depth and stencil attachments
+
     unsigned int rbo;
     glGenRenderbuffers(1, &rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
@@ -328,40 +148,54 @@ int main() {
         cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    
+    //Load needed textures for drawing a cube
+
     unsigned int containerDiffuse = loadTexture("resources/textures/container2.png");
     unsigned int containerSpecular = loadTexture("resources/textures/container2_specular.png");
     
-    //Execute this loop until window should close
+    //Execute this loop until window is given a signal to close
 
     while (!glfwWindowShouldClose(window)) {
+
+        //Get current viewport dimensions
 
         GLint viewPortDim[4];
         glGetIntegerv(GL_VIEWPORT, viewPortDim);
 
+        //Configure variables to make movement framerate-independent
+
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+        //Process user input
         
         update(window);
+
+        //Bind our framebuffer and clear the screen
 
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         glClearColor(programState->clearColor.r, programState->clearColor.g, programState->clearColor.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
 
+        //Those transformation matrices are universal and used by all the shaders
+
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+
+        //Configure cube drawing
 
         cubeShader.useProgram();
+        cubeShader.setVec3("viewPos", camera.Position);
+        cubeShader.setVec3("lightColor", programState->lightColor);
         cubeShader.setFloat("material.shininess", 32.0f);
         cubeShader.setInt("material.diffuse", 0);
         cubeShader.setInt("material.specular", 1);
-        // directional light
         cubeShader.setVec3("dirLight.direction", programState->dirLight.direction);
         cubeShader.setVec3("dirLight.ambient", programState->dirLight.ambient);
         cubeShader.setVec3("dirLight.diffuse", programState->dirLight.diffuse);
         cubeShader.setVec3("dirLight.specular", programState->dirLight.specular);
-        // point light
-        cubeShader.setVec3("viewPos", camera.Position);
         cubeShader.setVec3("pointLight.position", programState->pointLight.position);
         cubeShader.setVec3("pointLight.ambient", programState->pointLight.ambient);
         cubeShader.setVec3("pointLight.diffuse", programState->pointLight.diffuse);
@@ -369,11 +203,6 @@ int main() {
         cubeShader.setFloat("pointLight.constant", programState->pointLight.constant);
         cubeShader.setFloat("pointLight.linear", programState->pointLight.linear);
         cubeShader.setFloat("pointLight.quadratic", programState->pointLight.quadratic);
-        cubeShader.setVec3("lightColor", programState->lightColor);
-
-        // view/projection transformations
-        mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        mat4 view = camera.GetViewMatrix();
         cubeShader.setMat4("projection", projection);
         cubeShader.setMat4("view", view);
         
@@ -381,43 +210,53 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, containerDiffuse);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, containerSpecular);
+
+        //Draw multiple cubes
         
         glBindVertexArray(cubeVAO);
         for (unsigned int i = 0; i < 6; i++)
         {
-            mat4 model = mat4(1.0f);
-            model = translate(model, cubePositions[i]);
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
             float angle = 20.0f * (i+1);
-            model = rotate(model, radians(angle), vec3(1.0f, 0.3f, 0.5f));
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
             cubeShader.setMat4("model", model);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
-        // also draw the lamp object(s)
+        //Configure light source cube drawing
+        
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, programState->pointLight.position);
+        model = glm::scale(model, glm::vec3(0.2f));
         lightShader.useProgram();
-        lightShader.setMat4("projection", projection);
-        lightShader.setMat4("view", view);
-        mat4 model = mat4(1.0f);
-        model = translate(model, programState->pointLight.position);
-        model = scale(model, vec3(0.2f)); // Make it a smaller cube
         lightShader.setMat4("model", model);
+        lightShader.setMat4("view", view);
+        lightShader.setMat4("projection", projection);
         lightShader.setVec3("lightColor", programState->lightColor);
+
+        //Draw a light source cube
+
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
+        //Configure model drawing
+
+        model = glm::mat4(1.0f); //model transformation matrix
+        model = glm::translate(model, glm::vec3(0.0f, -3.0f, -5.0f));
+        model = glm::scale(model, glm::vec3(1.0f));
         modelShader.useProgram();
-        modelShader.setMat4("projection", projection);
+        modelShader.setMat4("model", model);
         modelShader.setMat4("view", view);
+        modelShader.setMat4("projection", projection);
         modelShader.setVec3("viewPos", camera.Position);
+        modelShader.setVec3("lightColor", programState->lightColor);
         modelShader.setFloat("shininess", 32.0f);
-        // directional light
         modelShader.setVec3("dirLight.direction", programState->dirLight.direction);
         modelShader.setVec3("dirLight.ambient", programState->dirLight.ambient);
         modelShader.setVec3("dirLight.diffuse", programState->dirLight.diffuse);
         modelShader.setVec3("dirLight.specular", programState->dirLight.specular);
-        // point light
-        modelShader.setVec3("viewPos", camera.Position);
         modelShader.setVec3("pointLight.position", programState->pointLight.position);
         modelShader.setVec3("pointLight.ambient", programState->pointLight.ambient);
         modelShader.setVec3("pointLight.diffuse", programState->pointLight.diffuse);
@@ -425,22 +264,22 @@ int main() {
         modelShader.setFloat("pointLight.constant", programState->pointLight.constant);
         modelShader.setFloat("pointLight.linear", programState->pointLight.linear);
         modelShader.setFloat("pointLight.quadratic", programState->pointLight.quadratic);
-        modelShader.setVec3("lightColor", programState->lightColor);
-        model = mat4(1.0f);
-        model = translate(model, vec3(0.0f, -3.0f, -5.0f));
-        model = scale(model, vec3(1.0f));
-        modelShader.setMat4("model", model);
+
+        //Draw a model
 
         myModel.Draw(modelShader);
 
+        //Configure ground plane drawing
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -3.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(200.0f));
         planeShader.useProgram();
-        model = mat4(1.0f);
-        model = translate(model, vec3(0.0f, -3.0f, 0.0f));
-        model = scale(model, vec3(200.0f));
         planeShader.setMat4("model", model);
         planeShader.setMat4("view", view);
         planeShader.setMat4("projection", projection);
         planeShader.setVec3("myColor", programState->planeColor);
+        planeShader.setVec3("lightColor", programState->lightColor);
         planeShader.setFloat("shininess", 32.0f);
         planeShader.setVec3("viewPos", camera.Position);
         planeShader.setVec3("dirLight.direction", programState->dirLight.direction);
@@ -454,42 +293,51 @@ int main() {
         planeShader.setFloat("pointLight.constant", programState->pointLight.constant);
         planeShader.setFloat("pointLight.linear", programState->pointLight.linear);
         planeShader.setFloat("pointLight.quadratic", programState->pointLight.quadratic);
-        planeShader.setVec3("lightColor", programState->lightColor);
+
+        //Draw a ground plane 
+
+
         glBindVertexArray(planeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
+        //If user pressed F1 enter console mode
 
         if(programState->imGuiEnabled)
             DrawImGui(programState);
+
+        //Unbind our framebuffer
        
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glDisable(GL_DEPTH_TEST);
 
+        //Configure and draw our screen texture
+
         screenShader.useProgram();
-        glBindVertexArray(quadVAO);
         screenShader.setInt("screenTexture", 0);
         screenShader.setBool("shouldAA", programState->antiAliasing);
         screenShader.setBool("shouldGrayscale", programState->grayScale);
-        glUniform2iv(glGetUniformLocation(screenShader.GetID(),"viewPortDim"), 1, &viewPortDim[2]);
+        glUniform2iv(glGetUniformLocation(screenShader.GetID(),"viewPortDim"), 1, &viewPortDim[2]); //TODO: Implement integer Vec2 uniform setter in Shader.h
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, screenTexture); // use the now resolved color attachment as the quad's texture
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, screenTexture);
+        glBindVertexArray(quadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
-        //check events, swap buffers
+        //Check events and swap buffers
 
         glfwPollEvents();
         glfwSwapBuffers(window);
     }
 
-    // Free all GPU resources
+    //Save program state and free all GPU resources to avoid memory leaks
+
+
+    programState->SaveToFile("resources/program_state.txt");
 
     ImGui_ImplGlfw_Shutdown();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui::DestroyContext();
-
-    programState->SaveToFile("resources/program_state.txt");
     glDeleteVertexArrays(1, &cubeVAO);
     glDeleteVertexArrays(1, &lightVAO);
     glDeleteVertexArrays(1, &planeVAO);
@@ -505,7 +353,8 @@ int main() {
     return EXIT_SUCCESS;
 }
 
-// Update window state
+
+//Update window state by processing user input
 
 void update(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -518,13 +367,13 @@ void update(GLFWwindow* window) {
         camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
-// Whenever window is resized adjust the viewport
+//Whenever window is resized adjust the viewport
 
 void fb_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-// Register keypresses and act accordingly
+//Callback function for when keyboard event is triggered
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
@@ -540,6 +389,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
+//Callback function for when mouse movement event is triggered
+
+bool firstMouse = true; //true only in first frame in application that mouse moves in
+
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     if (firstMouse)
     {
@@ -553,9 +406,13 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     lastY = ypos;
 }
 
+//Callback function for when mouse scroll event is triggered
+
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     camera.ProcessMouseScroll(yoffset);
 }
+
+//Texture loading function
 
 unsigned int loadTexture(char const* path)
 {
@@ -593,6 +450,58 @@ unsigned int loadTexture(char const* path)
 
     return textureID;
 }
+
+//Save program state to a file
+
+void ProgramState::SaveToFile(std::string filename) {
+    std::ofstream out(filename);
+    out << antiAliasing << '\n'
+        << grayScale << '\n'
+        << imGuiEnabled << '\n'
+        << planeColor.r << '\n'
+        << planeColor.g << '\n'
+        << planeColor.b << '\n'
+        << clearColor.r << '\n'
+        << clearColor.g << '\n'
+        << clearColor.b << '\n'
+        << lightColor.r << '\n'
+        << lightColor.g << '\n'
+        << lightColor.b << '\n'
+        << dirLight.direction.x << '\n'
+        << dirLight.direction.y << '\n'
+        << dirLight.direction.z << '\n'
+        << pointLight.position.x << '\n'
+        << pointLight.position.y << '\n'
+        << pointLight.position.z << '\n';
+}
+
+//If there is a file containing program state read from it
+
+void ProgramState::LoadFromFile(std::string filename) {
+    std::ifstream in(filename);
+    if (in) {
+        in >> antiAliasing
+            >> grayScale
+            >> imGuiEnabled
+            >> planeColor.r
+            >> planeColor.g
+            >> planeColor.b
+            >> clearColor.r
+            >> clearColor.g
+            >> clearColor.b
+            >> lightColor.r
+            >> lightColor.g
+            >> lightColor.b
+            >> dirLight.direction.x
+            >> dirLight.direction.y
+            >> dirLight.direction.z
+            >> pointLight.position.x
+            >> pointLight.position.y
+            >> pointLight.position.z;
+    }
+}
+
+//Draw graphical interface in console mode
 
 void DrawImGui(ProgramState* programState) {
     ImGui_ImplOpenGL3_NewFrame();
