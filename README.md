@@ -12,10 +12,10 @@ It was written using C++ and the OpenGL 3.3 specification
 This project is built for Windows 32-bit on Visual Studio 2019, but works perfectly fine on 64-bit version of Windows too. 
 
 Dependencies you need to install to run the project:
--Visual Studio 2019
--Assimp library for importing 3d models
+* Visual Studio 2019
+* Assimp library for importing 3d models
 
-To install assimp library you can go [here] (https://github.com/assimp/assimp/releases/tag/v3.3.1/) and download and install assimp-sdk-3.3.1-setup_vs2017.exe. After that go to (install-folder)/bin/x32 and copy assimp-vc140-mt.dll file to your system folder (usually Windows/System32 or Windows/SysWOW64). 
+To install assimp library you can go [here](https://github.com/assimp/assimp/releases/tag/v3.3.1/) and download and install assimp-sdk-3.3.1-setup_vs2017.exe. After that go to (install-folder)/bin/x32 and copy assimp-vc140-mt.dll file to your system folder (usually Windows/System32 or Windows/SysWOW64). 
 
 If you can't or don't want to go through this project dependancy installation process, there is a video demonstration of a project that I made using OBS studio.
 
