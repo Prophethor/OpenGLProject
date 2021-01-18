@@ -29,6 +29,7 @@ in vec2 myTexPos;
 uniform vec3 viewPos;
 uniform DirLight dirLight;
 uniform PointLight pointLight;
+uniform vec3 lightColor;
 uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_specular1;
 uniform float shininess;
@@ -62,7 +63,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     vec3 ambient = light.ambient * vec3(texture(texture_diffuse1, myTexPos));
     vec3 diffuse = light.diffuse * diff * vec3(texture(texture_diffuse1, myTexPos));
     vec3 specular = light.specular * spec * vec3(texture(texture_specular1, myTexPos));
-    return (ambient + diffuse + specular);
+    return (ambient + diffuse + specular)*lightColor;
 }
 
 // calculates the color when using a point light.
@@ -84,5 +85,5 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
-    return (ambient + diffuse + specular);
+    return (ambient + diffuse*lightColor + specular*lightColor);
 }
